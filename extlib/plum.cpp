@@ -23,6 +23,8 @@ void plumInit()
 
 // === cldib -> LIBPLUM stuff ===
 
+#define CLDIB_PLUM_COLOR_FORMAT (PLUM_COLOR_32 | PLUM_ALPHA_INVERT)
+
 struct plum_image *dib2plum(CLDIB *dib)
 {
 	if(dib == NULL)
@@ -35,7 +37,7 @@ struct plum_image *dib2plum(CLDIB *dib)
 		return NULL;
 	image->width = dib_get_width(dib);
 	image->height = dib_get_height(dib);
-	image->color_format = PLUM_COLOR_32;
+	image->color_format = CLDIB_PLUM_COLOR_FORMAT;
 	image->max_palette_index = 0;
 	image->frames = 1;
 
@@ -78,12 +80,12 @@ CLDIB *plum2dib(struct plum_image *fi)
 		dib = dib_alloc(fi->width, fi->height, 8, (const BYTE*) fi->data);
 		if (dib == NULL)
 			return NULL;
-		plum_convert_colors(dib_get_pal(dib), fi->palette, nclrs, PLUM_COLOR_32, fi->color_format);
-	} else if (fi->color_format != PLUM_COLOR_32) {
+		plum_convert_colors(dib_get_pal(dib), fi->palette, nclrs, CLDIB_PLUM_COLOR_FORMAT, fi->color_format);
+	} else if (fi->color_format != CLDIB_PLUM_COLOR_FORMAT) {
 		uint32_t *colors = (uint32_t*) malloc(sizeof(uint32_t) * fi->width * fi->height);
 		if (colors == NULL)
 			return NULL;
-		plum_convert_colors(colors, fi->data, fi->width * fi->height, PLUM_COLOR_32, fi->color_format);
+		plum_convert_colors(colors, fi->data, fi->width * fi->height, CLDIB_PLUM_COLOR_FORMAT, fi->color_format);
 		dib = dib_alloc(fi->width, fi->height, 32, (const BYTE*) colors);
 		free(colors);
 	} else {
@@ -103,7 +105,7 @@ CLDIB *plum2dib(struct plum_image *fi)
 CLDIB *cldib_load(const char *fpath, void *extra)
 {
 	unsigned error;
-	struct plum_image *image = plum_load_image_limited(fpath, PLUM_MODE_FILENAME, PLUM_COLOR_32 | PLUM_PALETTE_LOAD,
+	struct plum_image *image = plum_load_image_limited(fpath, PLUM_MODE_FILENAME, CLDIB_PLUM_COLOR_FORMAT | PLUM_PALETTE_LOAD,
 		16384 * 16384, &error);
 
 	if(image == NULL) {
