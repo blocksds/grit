@@ -46,12 +46,11 @@
 
 #include <vector>
 
-#include <cldib.h>
-#include <grit.h>
-#include <FreeImage.h>
+#include "cldib.h"
+#include "grit.h"
 
 #include "cli.h"
-#include "fi.h"
+#include "plum.h"
 
 void grit_dump(GritRec *gr, FILE *fp);
 void grit_dump_short(GritRec *gr, FILE *fp, const char *pre);
@@ -546,7 +545,7 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 	{
 		strcpy(str, pstr);
 		path_fix_sep(str);
-
+/*
 		// Check for bitdepth support
 		FREE_IMAGE_FORMAT fif= FreeImage_GetFIFFromFilename(str);
 		FI_SUPPORT_MODE fsm=  fiGetSupportModes(fif);
@@ -557,9 +556,9 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 			lprintf(LOG_WARNING, 
 "Filetype of %s doesn't allow 8bpp export. Switching to bmp.\n", 
 				path_get_name(str));
-			path_repl_ext(str, str, "bmp", MAXPATHLEN);
-				
+			path_repl_ext(str, str, "bmp", MAXPATHLEN);				
 		}
+*/
 		strrepl(&gr->shared->tilePath, str);
 		gr->gfxIsShared= true;
 
@@ -1196,12 +1195,9 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize, run and exit ---
-	FreeImage_Initialise();
-	fiInit();
 
+	plumInit();
 	int result= run_main(argc, argv);
-
-	FreeImage_DeInitialise();
 
 	//system("pause");
 

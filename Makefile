@@ -5,12 +5,13 @@
 # Source code paths
 # -----------------
 
-INCLUDEDIRS	:= cldib extlib libgrit srcgrit
+INCLUDEDIRS	:= cldib extlib libgrit libplum srcgrit
 
 # Source files
 # ------------
 
-SOURCES_C	:=
+SOURCES_C	:= \
+	libplum/libplum.c
 
 SOURCES_CPP	:= \
 	cldib/cldib_adjust.cpp \
@@ -30,7 +31,7 @@ SOURCES_CPP	:= \
 	libgrit/grit_xp.cpp \
 	libgrit/logger.cpp \
 	libgrit/pathfun.cpp \
-	extlib/fi.cpp \
+	extlib/plum.cpp \
 	srcgrit/cli.cpp \
 	srcgrit/grit_main.cpp
 
@@ -42,7 +43,7 @@ DEFINES		:= -DPACKAGE_VERSION=\"0.9.2\"
 # Libraries
 # ---------
 
-LIBS		:= -lfreeimage
+LIBS		:=
 LIBDIRS		:=
 
 # Build artifacts
@@ -97,7 +98,7 @@ INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
 
 LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
 
-CFLAGS		+= -std=gnu11 $(WARNFLAGS_C) $(DEFINES) $(INCLUDEFLAGS) -O3
+CFLAGS		+= -std=gnu17 $(WARNFLAGS_C) $(DEFINES) $(INCLUDEFLAGS) -O3
 
 CXXFLAGS	+= -std=gnu++14 $(WARNFLAGS_CXX) $(DEFINES) $(INCLUDEFLAGS) -O3
 
