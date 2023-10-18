@@ -79,7 +79,8 @@ endif
 # Compiler and linker flags
 # -------------------------
 
-WARNFLAGS_C	:= -Wall
+WARNFLAGS_C	:= -Wall \
+		   -Wno-maybe-uninitialized -Wno-dangling-else -Wno-parentheses
 
 WARNFLAGS_CXX	:= -Wall -Wno-misleading-indentation -Wno-unused-result \
 		   -Wno-comment -Wno-unused-variable -Wno-sign-compare \
