@@ -1,3 +1,4 @@
+// SPDX-FileNotice: Modified from the original version by the BlocksDS project, starting from 2023.
 //
 //! \file winglue.h
 //!  Required windows stuff for portability's sake

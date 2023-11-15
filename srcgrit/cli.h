@@ -1,4 +1,4 @@
-
+// SPDX-FileNotice: Modified from the original version by the BlocksDS project, starting from 2023.
 
 #ifndef _CLI_PARSER_H_
 #define _CLI_PARSER_H_

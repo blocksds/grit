@@ -1,3 +1,4 @@
+// SPDX-FileNotice: Modified from the original version by the BlocksDS project, starting from 2023.
 //
 // cldib_wu.h
 //   Wu quantizer implementation

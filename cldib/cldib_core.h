@@ -1,3 +1,4 @@
+// SPDX-FileNotice: Modified from the original version by the BlocksDS project, starting from 2023.
 //
 //! \file cldib_core.h
 //!  Some DIB utilities (thank you FreeImage)
