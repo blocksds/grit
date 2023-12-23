@@ -212,6 +212,7 @@ void grit_copy_options(GritRec *dst, const GritRec *src)
 
 	// File/symbol options.	
 	dst->fileType= src->fileType;
+	dst->extType= src->extType;
 	dst->bHeader= src->bHeader;
 	dst->bAppend= src->bAppend;
 	dst->bExport= src->bExport;
