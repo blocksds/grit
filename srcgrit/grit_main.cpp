@@ -124,7 +124,7 @@ const char appHelpText[]=
 "-Mw{n}         Metatile width (in tiles!) [1]\n"
 "-MRp           Metatile reduction (pal only) [none]\n"
 "\n--- File / var options ---\n"
-"-ft[!csbgr]    File type (no output, C, GNU asm, bin, gbfs, grf) [.s]\n"
+"-ft[!csbgrB]   File type (no output, C, GNU asm, bin, gbfs, grf, img/map/meta/pal) [.s]\n"
 "-fr            Enable GRF-format for .c or .s\n"
 "-fa            File append\n"
 "-fh | -fh!     Create header or not [create header]\n"
@@ -490,7 +490,8 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 	switch(pstr[0])
 	{
 	case '!':	gr->bExport= false;				break;
-	case 'b':	gr->fileType= GRIT_FTYPE_BIN;	break;
+	case 'b':	gr->fileType= GRIT_FTYPE_BIN;	gr->extType = 0; break;
+	case 'B':	gr->fileType= GRIT_FTYPE_BIN;	gr->extType = 1; break;
 	case 'g':	gr->fileType= GRIT_FTYPE_GBFS;	break;
 	case 'c':	gr->fileType= GRIT_FTYPE_C;		break;
 	case 'r':	gr->fileType= GRIT_FTYPE_GRF;	break;

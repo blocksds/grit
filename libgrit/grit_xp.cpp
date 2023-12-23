@@ -551,7 +551,10 @@ bool grit_xp_bin(GritRec *gr)
 
 	char fpath[MAXPATHLEN], str[MAXPATHLEN];
 	const char *fmode= gr->bAppend ? "a+b" : "wb";
-	const char *exts[4]= {"img.bin", "map.bin", "meta.bin", "pal.bin" };
+
+	const char *exts_0[4] = {"img.bin", "map.bin", "meta.bin", "pal.bin" };
+	const char *exts_1[4] = {"img", "map", "meta", "pal" };
+	const char **exts= gr->extType ? exts_1 : exts_0;
 
 	path_repl_ext(str, gr->dstPath, NULL, MAXPATHLEN);
 	

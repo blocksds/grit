@@ -251,6 +251,7 @@ struct GritRec
 	char	*dstPath;		//!< Output path directory (-o {name} ).
 	char	*symName;		//!< Output symbol name (-s {name} ).
 	u8		 fileType;		//!< Output file type (-ft{type} ).
+	u8		 extType;		//!< Type of extension strings used (-ftb vs -ftB)
 	bool	 bHeader;		//!< Create header file (-fh[!] ).
 	bool	 bAppend;		//!< Append to existing file (-fa).
 	bool	 bExport;		//!< Global export toggle (?).
