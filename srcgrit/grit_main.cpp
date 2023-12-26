@@ -100,8 +100,8 @@ const char appHelpText[]=
 "-mu(8|16|32)   Map data type: u8, u16, u32 [u16]\n"
 "-mz[!lhr0]     Map compression: off, lz77, huff, RLE, off+header [off]\n"
 "-ma{n}         Map-entry offset n (non-zero entries) [0]\n"
-"-mp{n}         NEW: Force mapsel palette to n\n"
-"-mB{n}:{(iphv[n])+}     NEW: Custom mapsel bitformat\n"
+"-mp{n}         Force mapsel palette to n\n"
+"-mB{n}:{(iphv[n])+}     Custom mapsel bitformat\n"
 //"-mA{n}         Map tile offset n (all entries) [0]\n"
 "-mR{t,p,f}     Tile reduction: (t)iles, (p)al, (f)lipped \n"
 "                 options can be combined [-mRtpf]\n"
@@ -136,13 +136,13 @@ const char appHelpText[]=
 "-S{name}       Symbol base name for shared data\n"
 "\n--- Misc ---\n"
 "-tc            Tiling in column-major order.\n"
-"-tw            NEW(?): base tile width [8].\n"
-"-th            NEW(?): base tile height [8].\n"
+"-tw            Base tile width [8].\n"
+"-th            Base tile height [8].\n"
 //"-q             Quiet mode; no report at the end\n"
 "-U(8|16|32)    All data type: u8, u16, u32\n"
 "-W{n}          Warning/log level 1, 2 or 3 [1]\n"
 "-Z[!lhr0]      All compression: off, lz77, huff, RLE, off+header [off]\n"
-"\nNew options: -fr, -ftr, -gS, -O, -pS, -S, -Z0 (et al)\n";
+"\n";
 
 
 
