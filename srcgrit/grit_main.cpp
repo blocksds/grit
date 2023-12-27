@@ -1112,7 +1112,7 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 				lprintf(LOG_ERROR, "Not enough memory for dstPath for %s\n", fpaths[ii]);
 				return EXIT_FAILURE;
 			}
-			snprintf(gr->dstPath, size , "%s%c%s", pOutDir, DIR_SEP, fileName);
+			snprintf(gr->dstPath, size, "%s%c%s", pOutDir, DIR_SEP, fileName);
 
 			lprintf(LOG_STATUS, "Saving %s outputs to directory %s\n", fpaths[ii], gr->dstPath);
 		}
