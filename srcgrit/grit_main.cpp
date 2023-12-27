@@ -132,6 +132,7 @@ const char appHelpText[]=
 "-fx{name}      External tileset file\n"
 "-o{name}       Destination filename [based on source]\n"
 "-s{name}       Symbol base name [based from dst]\n"
+"-D{path}       Destination folder for non-shared data\n"
 "-O{name}       Destination file for shared data\n"
 "-S{name}       Symbol base name for shared data\n"
 "\n--- Misc ---\n"
@@ -1095,6 +1096,26 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 
 		if(gr->palIsShared || gr->gfxIsShared)
 			gr->palProcMode &= ~GRIT_OUTPUT;
+
+		// If the user has specified a directory to output all non-shared data
+		const char *pOutDir= CLI_STR("-D", "");
+		if(!isempty(pOutDir))
+		{
+			// Get file name without the rest of the path
+			const char *fileName = path_get_name(gr->srcPath);
+
+			// Concatenate pOutDir with the file name obtained from srcPath
+			size_t size = strlen(pOutDir) + 1 + strlen(fileName) + 1;
+			gr->dstPath = (char *)malloc(size);
+			if (gr->dstPath == NULL)
+			{
+				lprintf(LOG_ERROR, "Not enough memory for dstPath for %s\n", fpaths[ii]);
+				return EXIT_FAILURE;
+			}
+			snprintf(gr->dstPath, size , "%s%c%s", pOutDir, DIR_SEP, fileName);
+
+			lprintf(LOG_STATUS, "Saving %s outputs to directory %s\n", fpaths[ii], gr->dstPath);
+		}
 
 		// Run and stuff
 		if( !grit_run(gr) )
