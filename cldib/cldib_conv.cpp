@@ -133,7 +133,7 @@ CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base)
 	{
 		CLDIB *tmp= NULL, *dst= NULL;
 
-		DWORD nclrs= 1<<dstB;
+		DWORD nclrs= (1<<dstB) - 1; // Leave one entry free for transparency
 		if(base != 0 && base<nclrs)
 			nclrs= base;
 		
