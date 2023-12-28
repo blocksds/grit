@@ -233,17 +233,19 @@ bool grit_prep_work_dib(GritRec *gr)
 	if(dib_get_bpp(dib)==8)
 	{
 		// If gfx-trans && !pal-trans:
-		//   Find gfx-trans in palette and use that
+		//   Find gfx-trans in palette and use that. If it isn't found, add the
+		//   transparent color to the palette.
+		// Later we will swap color index 0 with the transparent color index.
 		if(gr->gfxHasAlpha && !gr->palHasAlpha)
 		{
 			rgb= &gr->gfxAlphaColor;
 			RGBQUAD *pal= dib_get_pal(dib);
 
-			lprintf(LOG_WARNING, 
+			lprintf(LOG_WARNING,
 				"  tru/pal -> pal conversion with transp color option.\n"
-				"    looking for color %02X%02X%02X in palette.\n", 
+				"    looking for color %02X%02X%02X in palette.\n",
 				rgb->rgbRed, rgb->rgbGreen, rgb->rgbBlue);
-			
+
 			uint ii_min= 0, dist, dist_min;
 			dist_min= rgb_dist(rgb, &pal[0]);
 
@@ -260,15 +262,71 @@ bool grit_prep_work_dib(GritRec *gr)
 			// HACK: count 'match' only if average error is < +/-14
 			if(dist_min < 576)
 			{
+				// The color has been found in the palette, use that index.
+				lprintf(LOG_STATUS,
+					"Transparent color found at index %d.\n", ii_min);
 				gr->palHasAlpha= true;
 				gr->palAlphaId= ii_min;
 			}
+			else
+			{
+				// The color hasn't been found. Look for an unused color
+				// starting from index 0 and set that unused color to the
+				// transparent one.
+				lprintf(LOG_WARNING,
+					"Transparent color not found, adding it to the palette.\n");
+
+				BYTE *imgD= dib_get_img(dib);
+				nn= dib_get_size_img(dib);
+
+				int unusedId= -1;
+
+				for(int id=0; id<256; id++)
+				{
+					bool isUsed = false;
+
+					// Check if this index is used in the paletted bitmap
+					for(ii=0; ii<nn; ii++)
+					{
+						if(imgD[ii] == id)
+						{
+							isUsed = true;
+							break;
+						}
+					}
+
+					if(!isUsed)
+					{
+						unusedId= id;
+						break;
+					}
+				}
+
+				if(unusedId == -1)
+				{
+					lprintf(LOG_ERROR,
+						"Transparent color not found in palette, and no free colors available.\n");
+					return false;
+				}
+
+				lprintf(LOG_WARNING,
+					"Setting unused color index %d to transparent color.\n",
+					unusedId);
+
+				gr->palHasAlpha= true;
+				gr->palAlphaId= unusedId;
+
+				pal[unusedId].rgbRed= rgb->rgbRed;
+				pal[unusedId].rgbGreen= rgb->rgbGreen;
+				pal[unusedId].rgbBlue= rgb->rgbBlue;
+			}
 		}
 
-		// Swap alpha and pixels palette entry
+		// Swap alpha and pixels palette entry so that index 0 is the
+		// transparent color.
 		if(gr->palHasAlpha)
 		{
-			lprintf(LOG_STATUS, "  Palette transparency: pal[%d].\n", 
+			lprintf(LOG_STATUS, "  Palette transparency: pal[%d].\n",
 				gr->palAlphaId);
 			BYTE *imgD= dib_get_img(dib);
 			nn= dib_get_size_img(dib);
@@ -289,6 +347,7 @@ bool grit_prep_work_dib(GritRec *gr)
 		{
 			lprintf(LOG_STATUS, "  Palette merging\n");
 			nn= dib_pal_reduce(dib, &gr->shared->palRec);
+			lprintf(LOG_STATUS, "    New palette has %d colors\n", nn);
 			if(nn>PAL_MAX)
 				lprintf(LOG_WARNING, "    New palette exceeds 256. Truncating.\n");
 		}

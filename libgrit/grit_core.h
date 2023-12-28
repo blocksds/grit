@@ -209,7 +209,7 @@ struct GritShared
 	char	*dstPath;		//!< Path to shared datastore (can be NULL)
 	u8		 gfxBpp;		//!< Bitdepth for shared graphics (unused for now)
 	CLDIB	*dib;			//!< External tileset DIB (can be NULL)
-	RECORD	 palRec;		//!< Shared palette (unused for now)
+	RECORD	 palRec;		//!< Shared palette
 };
 
 //! Basic grit struct
