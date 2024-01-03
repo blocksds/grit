@@ -861,6 +861,12 @@ chunk_t *chunk_create(const char *id, const void *data, uint size)
 */
 chunk_t *chunk_merge(const char *id, chunk_t *cklist[], uint count, const char *groupID)
 {
+	if((id == NULL) || (groupID == NULL))
+	{
+		printf("%s: id and groupID must be provided", __func__);
+		return NULL;
+	}
+
 	uint ii;
 	uint size= 0;
 
@@ -871,31 +877,18 @@ chunk_t *chunk_merge(const char *id, chunk_t *cklist[], uint count, const char *
 	chunk_t *chunk;
 	u8 *dst;
 
-	// Split creation into with or without group id.
-	if(groupID)
-	{
-		// Make room for groupsID+total_size+id+data
-		chunk= (chunk_t*)malloc(size+8+4);
-		chunk_t *sub= (chunk_t*)chunk->data;
+	// Make room for groupsID + total_size + id + size + data
+	chunk= (chunk_t*)malloc(size+8+8);
+	chunk_t *sub= (chunk_t*)chunk->data;
+	for(ii=0; ii<4; ii++)
+		chunk->id[ii]= groupID[ii];
+	chunk->size= size+4;
 
-		for(ii=0; ii<4; ii++)
-		{
-			chunk->id[ii]= groupID[ii];
-			chunk->data[ii]= id[ii];
-		}
+	for(ii=0; ii<4; ii++)
+		sub->id[ii]= id[ii];
+	sub->size= size-4;
 
-		chunk->size= size+4;
-		dst= chunk->data+4;
-	}
-	else
-	{
-		chunk= (chunk_t*)malloc(size+8);	
-		for(ii=0; ii<4; ii++)
-			chunk->id[ii]= id[ii];
-		chunk->size= size;
-		dst= chunk->data;
-	}
-
+	dst= chunk->data+8;
 
 	for(ii=0; ii<count; ii++)
 	{
@@ -908,7 +901,6 @@ chunk_t *chunk_merge(const char *id, chunk_t *cklist[], uint count, const char *
 	}
 
 	return chunk;
-	
 }
 
 //! Free a RIFF chunk
