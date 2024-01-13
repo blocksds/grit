@@ -609,7 +609,9 @@ bool grit_prep_gfx(GritRec *gr)
 
 		if(width<8 || width>1024 || height<8 || height>1024)
 		{
-			lprintf(LOG_ERROR, "  one of texture dimensions violates 8 <= n <= 1024\n");
+			lprintf(LOG_ERROR,
+				"  one of texture dimensions (%d x %d) violates 8 <= n <= 1024\n",
+				width, height);
 			return false;
 		}
 	}
