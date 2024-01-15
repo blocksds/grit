@@ -829,7 +829,7 @@ bool grit_load_ext_tiles(GritRec *gr)
 	if( dib_get_bpp(dib) < 8 )
 	{
 		lprintf(LOG_WARNING, "  External tileset bpp < 8. Converting to 8.\n");
-		dib_convert(dib, 8, 0);
+		dib_convert(dib, 8, 0, false);
 	}
 /*
 	// TODO: allow for metatiled sets

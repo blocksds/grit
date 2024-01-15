@@ -31,7 +31,7 @@ struct plum_image *dib2plum(CLDIB *dib)
 	if(dib == NULL)
 		return NULL;
 
-	dib_convert(dib, dib_get_bpp(dib) < 8 ? 8 : 32, 0);
+	dib_convert(dib, dib_get_bpp(dib) < 8 ? 8 : 32, 0, false);
 
 	struct plum_image *image = plum_new_image();
 	if(image == NULL)

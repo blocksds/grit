@@ -19,6 +19,7 @@
 
 #include "cldib_quant.h"
 
+#include "logger.h"
 
 //! Parse \a str into an RGBQUAD
 /*! \param str	String to parse. Allowed formats are 16bit hex 
@@ -50,13 +51,13 @@ RGBQUAD str2rgb(const char *str)
 
 // === DIB FUNCTIONS ==================================================
 
-bool dib_convert(CLDIB *dib, int dstB, DWORD base)
+bool dib_convert(CLDIB *dib, int dstB, DWORD base, bool allocTransparent)
 {
 	// Nothing to do
 	if(dib && dib_get_bpp(dib)==dstB && base==0)
 		return true;
 
-	CLDIB *tmp= dib_convert_copy(dib, dstB, base);
+	CLDIB *tmp= dib_convert_copy(dib, dstB, base, allocTransparent);
 	return dib_mov(dib, tmp);
 }
 
@@ -101,7 +102,7 @@ bool dib_true_to_8(CLDIB *dib, int nclrs)
 */
 // PONDER: have flags for RGB/BGR and stuff? (Or does that belong to 
 // data?)
-CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base)
+CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base, bool allocTransparent)
 {
 	if(src == NULL)
 		return NULL;
@@ -133,16 +134,23 @@ CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base)
 	{
 		CLDIB *tmp= NULL, *dst= NULL;
 
-		DWORD nclrs= (1<<dstB) - 1; // Leave one entry free for transparency
+		DWORD nclrs= 1<<dstB;
+		if(allocTransparent) // Leave one entry free for transparency
+			nclrs--;
 		if(base != 0 && base<nclrs)
 			nclrs= base;
-		
+
+		lprintf(LOG_WARNING, "Truecolor -> Palette (max %d colors)\n", nclrs);
+
 		tmp= dib_true_to_8_copy(src, nclrs);
 		if(tmp == NULL)
 			return NULL;
 		if(dstB == 8)
 			return tmp;
-		dst= dib_bit_unpack_copy(tmp, dstB, 0);
+
+		// Unpack to 8 bpp instead of dstB so that the caller knows how to
+		// handle the result
+		dst= dib_bit_unpack_copy(tmp, 8, 0);
 		dib_free(tmp);
 		return dst;
 	}

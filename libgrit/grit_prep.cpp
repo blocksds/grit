@@ -146,7 +146,7 @@ bool grit_prep_work_dib(GritRec *gr)
 			lprintf(LOG_WARNING, "  converting from %d bpp to %d bpp.\n", 
 				dibB, gr->gfxBpp);
 
-			CLDIB *dib2= dib_convert_copy(dib, 16, 0);
+			CLDIB *dib2= dib_convert_copy(dib, 16, 0, false);
 
 			// If paletted src AND -pT AND NOT -gT[!]
 			//   use trans color pal[T]
@@ -220,8 +220,12 @@ bool grit_prep_work_dib(GritRec *gr)
 	{
 		lprintf(LOG_WARNING, "  converting from %d bpp to %d bpp.\n", 
 			dibB, gr->gfxBpp);
-		
-		if(!dib_convert(dib, 8, 0))
+
+		bool allocTransparent = true;
+		if(gr->texModeEnabled)
+			allocTransparent = false;
+
+		if(!dib_convert(dib, gr->gfxBpp, 0, allocTransparent))
 		{
 			dib_free(dib);
 			lprintf(LOG_ERROR, "  Bpp conversion failed.\n");	
@@ -229,8 +233,14 @@ bool grit_prep_work_dib(GritRec *gr)
 		}
 	}
 
-	// Palette transparency additions.
-	if(dib_get_bpp(dib)==8)
+	// Palette transparency additions. Don't handle transparency for special
+	// texture formats.
+	if(gr->texModeEnabled)
+	{
+		lprintf(LOG_WARNING,
+			"Texture mode enabled, ignoring transparent color.\n");
+	}
+	else if(dib_get_bpp(dib)==8)
 	{
 		// If gfx-trans && !pal-trans:
 		//   Find gfx-trans in palette and use that. If it isn't found, add the

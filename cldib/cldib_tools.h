@@ -76,13 +76,13 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal);
 //! \name DIB converters
 // \{
 
-bool dib_convert(CLDIB *dib, int dstB, DWORD base);
+bool dib_convert(CLDIB *dib, int dstB, DWORD base, bool allocTransparent);
 bool dib_bit_unpack(CLDIB *dib, int dstB, DWORD base);
 bool dib_8_to_true(CLDIB *dib, int dstB);
 bool dib_true_to_true(CLDIB *dib, int dstB);
 bool dib_true_to_8(CLDIB *dib, int nclrs);
 
-CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base);
+CLDIB *dib_convert_copy(CLDIB *src, int dstB, DWORD base, bool allocTransparent);
 CLDIB *dib_bit_unpack_copy(CLDIB *src, int dstB, DWORD base);
 CLDIB *dib_8_to_true_copy(CLDIB *src, int dstB);
 CLDIB *dib_true_to_true_copy(CLDIB *src, int dstB);
