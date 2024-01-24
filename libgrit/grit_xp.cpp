@@ -922,8 +922,20 @@ chunk_t *grit_prep_grf(GritRec *gr)
 		"MMAP",	"PAL "
 	};
 	uint bpps[4]= { gr->gfxBpp, 16, 16, 16 };
+
 	if(gr->mapLayout == GRIT_MAP_AFFINE)
 		bpps[GRIT_ITEM_MAP]= 8;
+
+	if(gr->texModeEnabled)
+	{
+		// Special NDS texture formats
+		if(gr->gfxTexMode == GRIT_TEXFMT_A5I3)
+			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_A5I3;
+		else if(gr->gfxTexMode == GRIT_TEXFMT_A3I5)
+			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_A3I5;
+		else if(gr->gfxTexMode == GRIT_TEXFMT_4x4)
+			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_4x4;
+	}
 
 	memset(&hdr, 0, sizeof(hdr));
 

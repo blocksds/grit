@@ -92,6 +92,16 @@ enum EGritGraphicsTextureFormat
 	GRIT_TEXFMT_4x4 = 3,
 };
 
+//! Special values for the GFX attribute field of GRF files for NDS textures.
+enum EGritGrfNdsTextureTypes
+{
+	// The values must be high enough that they can't represent a sensible BPP
+	// to avoid confusion.
+	GRF_TEXFMT_A5I3	= 128,
+	GRF_TEXFMT_A3I5	= 129,
+	GRF_TEXFMT_4x4	= 130,
+};
+
 //! Tilemap reduction modes.
 /*!	These modes can be combined: 
 	-mRtfp (or -mRfp, -mRftp, etc) means tiles, flip & pal reduction
