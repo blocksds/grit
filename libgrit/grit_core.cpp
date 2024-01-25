@@ -672,6 +672,9 @@ bool grit_validate(GritRec *gr)
 
 		gr->mapProcMode= GRIT_EXCLUDE;	// No map. REPONDER
 		gr->palProcMode= GRIT_EXCLUDE;	// No pal either.
+		gr->palEndSet = true;
+		gr->palStart = 0;
+		gr->palEnd = 0;
 		break;
 	case 3: case 5:
 		gr->mapProcMode= GRIT_EXCLUDE;	// No map. REPONDER
