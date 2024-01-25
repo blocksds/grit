@@ -660,6 +660,12 @@ bool grit_validate(GritRec *gr)
 	case 0:
 		gr->gfxBpp=8;
 	case 1: case 2: case 4: case 8:
+		if(!gr->palEndSet)
+		{
+			lprintf(LOG_STATUS,"Guessing palette size for 1/2/4/8 bpp graphics\n");
+			gr->palEndSet = true;
+			gr->palEnd = gr->palStart + (1 << gr->gfxBpp);
+		}
 		break;
 	case 16: case 24: case 32:
 		gr->gfxBpp= 16;
@@ -684,6 +690,9 @@ bool grit_validate(GritRec *gr)
 		lprintf(LOG_ERROR, "  Bad bpp (%d).\n", bpp);
 		return false;
 	}
+
+	lprintf(LOG_STATUS,"Guessed number of palette colors: %u\n",
+			gr->palEnd - gr->palStart);
 
 	// Raw binary cannot be appended
 	if(gr->fileType==GRIT_FTYPE_BIN && gr->bAppend)

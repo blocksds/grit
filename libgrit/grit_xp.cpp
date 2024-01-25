@@ -921,7 +921,8 @@ chunk_t *grit_prep_grf(GritRec *gr)
 		(gr->isMetaTiled() ? "MTIL" : "MAP "),
 		"MMAP",	"PAL "
 	};
-	uint bpps[4]= { gr->gfxBpp, 16, 16, 16 };
+	uint palColors = gr->palEnd - gr->palStart;
+	uint bpps[4]= { gr->gfxBpp, 16, 16, palColors };
 
 	if(gr->mapLayout == GRIT_MAP_AFFINE)
 		bpps[GRIT_ITEM_MAP]= 8;
