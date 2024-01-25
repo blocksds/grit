@@ -126,9 +126,9 @@ struct chunk_t
 struct GrfHeader
 {
 	union {
-		u8 attrs[4];
+		u16 attrs[4];
 		struct {
-			u8	gfxAttr, mapAttr, mmapAttr, palAttr;
+			u16	gfxAttr, mapAttr, mmapAttr, palAttr;
 		};
 	};
 	u8		tileWidth, tileHeight;
