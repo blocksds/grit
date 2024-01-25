@@ -660,11 +660,22 @@ bool grit_validate(GritRec *gr)
 	case 0:
 		gr->gfxBpp=8;
 	case 1: case 2: case 4: case 8:
-		if(!gr->palEndSet)
+		if(gr->texModeEnabled && !gr->palEndSet)
 		{
-			lprintf(LOG_STATUS,"Guessing palette size for 1/2/4/8 bpp graphics\n");
+			lprintf(LOG_STATUS,"Guessing palette size for 1/2/4/8 bpp texture\n");
 			gr->palEndSet = true;
+			gr->palStart = 0;
 			gr->palEnd = gr->palStart + (1 << gr->gfxBpp);
+		}
+		else
+		{
+			// Other graphics may use multiple palettes, so we should still fix
+			// this size to 256. For example, 16 color backgrounds can use any
+			// of the 16 palettes available, so we should still allocate 256
+			// colors for the graphics.
+			lprintf(LOG_STATUS,"Fixing palette size to 256 colors for 1/2/4/8 bpp graphics\n");
+			gr->palStart = 0;
+			gr->palEnd = gr->palStart+256;
 		}
 		break;
 	case 16: case 24: case 32:
