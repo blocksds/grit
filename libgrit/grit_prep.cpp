@@ -235,10 +235,10 @@ bool grit_prep_work_dib(GritRec *gr)
 
 	// Palette transparency additions. Don't handle transparency for special
 	// texture formats.
-	if(gr->texModeEnabled)
+	if(gr->texModeEnabled && (gr->gfxTexMode != GRIT_TEXFMT_NONE))
 	{
 		lprintf(LOG_WARNING,
-			"Texture mode enabled, ignoring transparent color.\n");
+			"Special texture mode enabled, ignoring transparent color.\n");
 	}
 	else if(dib_get_bpp(dib)==8)
 	{
