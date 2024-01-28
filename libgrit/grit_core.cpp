@@ -669,13 +669,11 @@ bool grit_validate(GritRec *gr)
 		}
 		else
 		{
-			// Other graphics may use multiple palettes, so we should still fix
-			// this size to 256. For example, 16 color backgrounds can use any
-			// of the 16 palettes available, so we should still allocate 256
-			// colors for the graphics.
-			lprintf(LOG_STATUS,"Fixing palette size to 256 colors for 1/2/4/8 bpp graphics\n");
-			gr->palStart = 0;
-			gr->palEnd = gr->palStart+256;
+			// Other graphics may use multiple palettes, so we should still use
+			// the precalculated size. For example, 16 color backgrounds can use
+			// any of the 16 palettes available or just one palette, this
+			// function can't know.
+			lprintf(LOG_STATUS,"Not modifying palette size for 1/2/4/8 bpp graphics\n");
 		}
 		break;
 	case 16: case 24: case 32:
