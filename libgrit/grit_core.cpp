@@ -17,14 +17,8 @@
 #include <string.h>
 #include <time.h>
 
-//#include <sys/param.h>
-
 #include <cldib.h>
 #include "grit.h"
-
-#ifdef _MSC_VER
-#include "grit_version.h"
-#endif
 
 // --------------------------------------------------------------------
 // CONSTANTS

@@ -32,14 +32,10 @@
 
 // PONDER, are these really necessary?
 #ifndef _MSC_VER
-#include <sys/param.h>
-#include <unistd.h>
-#include <strings.h>
+//#include <sys/param.h>
+//#include <unistd.h>
+//#include <strings.h>
 #endif	// _MSC_VER
-
-#ifdef _MSC_VER
-#include "grit_version.h"
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
