@@ -82,6 +82,13 @@ endif
 WARNFLAGS_C	:= -Wall \
 		   -Wno-maybe-uninitialized -Wno-dangling-else -Wno-parentheses
 
+# As of GCC 14, implicit function declarations are considered errors.
+# However, libplum in some cases tries to call the C11 standard function
+# aligned_alloc, which is not provided on MinGW nor is it necessary there.
+# This is a workaround which demotes the relevant error back to a warning.
+# If it ever becomes necessary, the linking will fail regardless.
+WARNFLAGS_C	+= -Wno-implicit-function-declaration
+
 WARNFLAGS_CXX	:= -Wall -Wno-misleading-indentation -Wno-unused-result \
 		   -Wno-comment -Wno-unused-variable -Wno-sign-compare \
 		   -Wno-parentheses -Wno-format-truncation \
