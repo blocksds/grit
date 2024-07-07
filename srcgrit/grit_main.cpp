@@ -868,7 +868,7 @@ bool grit_save_ext_tiles(GritRec *gr)
 
 	if(dib_save(grs->dib, grs->tilePath, NULL) == false)
 	{
-		lprintf(LOG_WARNING, "  Can't save tiles to `%s'", grs->tilePath);
+		lprintf(LOG_WARNING, "  Can't save tiles to `%s'\n", grs->tilePath);
 		return false;
 	}
 
