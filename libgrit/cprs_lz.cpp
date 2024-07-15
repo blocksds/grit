@@ -165,6 +165,8 @@ uint lz77gba_compress(RECORD *dst, const RECORD *src)
 	OutSize= ALIGN4(OutSize);
 
 	u8 *dstD= (u8*)malloc(OutSize);
+	if(dstD == NULL)
+		return 0;
 	memcpy(dstD, OutBuf, OutSize);
 	rec_attach(dst, dstD, 1, OutSize);
 

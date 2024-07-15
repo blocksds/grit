@@ -730,8 +730,8 @@ bool grit_validate(GritRec *gr)
 		int nclrs= dib_get_nclrs(gr->srcDib);
 		if(nclrs != 0 && gr->palEnd > gr->palStart+nclrs)
 		{
-			lprintf(LOG_WARNING, "  Palette: end (%d) > #colors (%d). Clamping to %d.\n", 
-				gr->palStart+nclrs);
+			lprintf(LOG_WARNING, "  Palette: end (%d) > number of colors (%d). Clamping to %d.\n",
+				gr->palEnd, nclrs, gr->palStart+nclrs);
 			gr->palEnd= gr->palStart+nclrs;
 		}
 	}

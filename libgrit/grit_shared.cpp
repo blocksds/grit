@@ -87,7 +87,14 @@ void grs_run(GritShared *grs, GritRec *gr_base)
 		// Palette only. Create new dib.
 		gr->srcDib= dib_alloc(16, 16, 8, NULL);
 		memset(dib_get_pal(gr->srcDib), 0, PAL_MAX*RGB_SIZE);
-		memcpy(dib_get_pal(gr->srcDib), grs->palRec.data, rec_size(&grs->palRec));
+		size_t size = rec_size(&grs->palRec);
+		if (size > 256*RGB_SIZE)
+		{
+			lprintf(LOG_WARNING, "Palette is too big: %u > 256. Truncating.\n",
+			        size / RGB_SIZE);
+			size = 256*RGB_SIZE;
+		}
+		memcpy(dib_get_pal(gr->srcDib), grs->palRec.data, size);
 	}
 	else
 		gr->srcDib= dib_clone(grs->dib);
