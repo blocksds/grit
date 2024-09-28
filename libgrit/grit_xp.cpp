@@ -127,6 +127,7 @@ struct chunk_t
 
 struct GrfHeader
 {
+	u16		version;
 	union {
 		u16 attrs[4];
 		struct {
@@ -255,7 +256,7 @@ uint grit_xp_size(GritRec *gr)
 
 	if(gr->bRiff)
 	{
-		size= 8+8+8+sizeof(GrfHeader);	// RIFF + GRF + HDR overhead.
+		size= 8+8+8+sizeof(GrfHeader);	// RIFF + GRF + HDRX overhead.
 		extra= 8;
 	}
 
@@ -927,6 +928,8 @@ chunk_t *grit_prep_grf(GritRec *gr)
 
 	// Semi-constant data.
 
+	hdr.version = 2;
+
 	const char *ckIDs[4]= 
 	{
 		"GFX ",
@@ -977,7 +980,7 @@ chunk_t *grit_prep_grf(GritRec *gr)
 	}
 
 	// Create header chunk and merge
-	cklist[0]= chunk_create("HDR ", &hdr, sizeof(GrfHeader));
+	cklist[0]= chunk_create("HDRX", &hdr, sizeof(GrfHeader));
 	chunk_t *chunk= chunk_merge("GRF ", cklist, 5, "RIFF");
 
 	for(int ii=0; ii<5; ii++)
