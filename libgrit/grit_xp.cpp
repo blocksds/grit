@@ -819,12 +819,10 @@ int gbfs_namecmp(const void *a, const void *b)
 int grit_gbfs_entry_init(GBFS_ENTRY *gben, const RECORD *rec, 
 	const char *basename, int affix)
 {
-	char name[32];
-	strncpy(name, basename, 21);
-	name[21]= '\0';
-	strcat(name, c_identAffix[affix]);
+	char name[24 + 1] = { 0 };
+	snprintf(name, sizeof(name), "%.21s%.3s", basename, c_identAffix[affix]);
 
-	strncpy(gben->name, name, 24);
+	memcpy(gben->name, name, 24);
 	gben->len= ALIGN4(rec_size(rec));
 	gben->data_offset= 0;
 
