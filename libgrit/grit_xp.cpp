@@ -136,6 +136,7 @@ struct GrfHeader
 	};
 	u8		tileWidth, tileHeight;
 	u8		metaWidth, metaHeight;
+	u16		unused;
 	ule32	gfxWidth, gfxHeight;
 };
 
@@ -937,9 +938,6 @@ chunk_t *grit_prep_grf(GritRec *gr)
 	uint palColors = gr->palEnd - gr->palStart;
 	uint bpps[4]= { gr->gfxBpp, 16, 16, palColors };
 
-	if(gr->mapLayout == GRIT_MAP_AFFINE)
-		bpps[GRIT_ITEM_MAP]= 8;
-
 	if(gr->texModeEnabled)
 	{
 		// Special NDS texture formats
@@ -950,6 +948,26 @@ chunk_t *grit_prep_grf(GritRec *gr)
 		else if(gr->gfxTexMode == GRIT_TEXFMT_4x4)
 			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_4x4;
 	}
+
+	// Determine background type
+
+	EGritGrfNdsBackgroundTypes bgfmt = GRF_BGFMT_NO_DATA;
+
+	if (gr->mapProcMode != GRIT_EXCLUDE)
+	{
+		if (gr->mapLayout == GRIT_MAP_FLAT) // -mLf
+			bgfmt = GRF_BGFMT_REG_16x16;
+		else if (gr->mapLayout == GRIT_MAP_REG) // -mLs
+			bgfmt = GRF_BGFMT_REG_256x1;
+		else if (gr->mapLayout == GRIT_MAP_AFFINE) // -mLa
+			bgfmt = GRF_BGFMT_AFF_256x1;
+
+		// TODO: GRF_BGFMT_AFF_EXT_256x16
+	}
+
+	bpps[GRIT_ITEM_MAP]= bgfmt;
+
+	// Prepare GRF file header
 
 	memset(&hdr, 0, sizeof(hdr));
 

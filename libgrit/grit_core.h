@@ -102,6 +102,16 @@ enum EGritGrfNdsTextureTypes
 	GRF_TEXFMT_4x4	= 130,
 };
 
+//! Special values for the MAP attribute field of GRF files for NDS backgrounds.
+enum EGritGrfNdsBackgroundTypes
+{
+	GRF_BGFMT_NO_DATA			= 0, //!< No background present
+	GRF_BGFMT_REG_16x16			= 1, //!< Regular background: 16 palettes of 16 colors
+	GRF_BGFMT_REG_256x1			= 2, //!< Regular background: 1 palette of 256 colors
+	GRF_BGFMT_AFF_256x1			= 3, //!< Affine background: 1 palette of 256 colors
+	GRF_BGFMT_AFF_EXT_256x16	= 4, //!< Extended affine background: 16 palettes of 256 colors
+};
+
 //! Tilemap reduction modes.
 /*!	These modes can be combined: 
 	-mRtfp (or -mRfp, -mRftp, etc) means tiles, flip & pal reduction
