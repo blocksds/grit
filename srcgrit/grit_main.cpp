@@ -59,18 +59,12 @@ void grit_dump_short(GritRec *gr, FILE *fp, const char *pre);
 // CONSTANTS
 // --------------------------------------------------------------------
 
-#ifndef PACKAGE_VERSION
-#error PACKAGE_VERSION must be defined such as "0.8.4"
-#endif
-
 // --- Application constants ---
 
-#define APP_VERSION	PACKAGE_VERSION
-
-const char appIdent[]= "grit v" PACKAGE_VERSION;
+const char appIdent[]= "grit " VERSION_ID;
 
 const char appHelpText[]= 
-"GRIT: GBA Raster Image Transmogrifier. (grit v" APP_VERSION ")\n"
+"GRIT: GBA Raster Image Transmogrifier. (grit " VERSION_ID ")\n"
 "  Converts bitmap files into something the GBA can use.\n"
 "usage: grit srcfile(s) [args]\n\n"
 "\n--- Graphics options (base: \"-g\") ---\n"

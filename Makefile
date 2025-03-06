@@ -7,6 +7,17 @@
 
 INCLUDEDIRS	:= cldib extlib libgrit libplum srcgrit
 
+# Try to find the SDK version if it wasn't already provided e.g. by the parent Makefile
+SDK_VERSION	?= $(shell git describe --tags --exact-match --dirty 2>/dev/null)
+
+# Fallback to commit hash
+ifeq ($(SDK_VERSION),)
+    # --exclude to prevent any older tags from being displayed
+    VERSION_ID	:= "commit $(shell git describe --always --dirty --exclude '*' 2>/dev/null)"
+else
+    VERSION_ID	:= "BlocksDS $(SDK_VERSION)"
+endif
+
 # Source files
 # ------------
 
@@ -38,7 +49,7 @@ SOURCES_CPP	:= \
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:= -DPACKAGE_VERSION=\"0.9.2\"
+DEFINES		:= -DVERSION_ID=\"$(VERSION_ID)\"
 
 # Libraries
 # ---------
