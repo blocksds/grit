@@ -1,5 +1,9 @@
 # grit changelog
 
+NOTE: (Win)grit was born '(Win)git. But because the linux kernel versioning is
+also called 'git' and g(r)it's supposed to be a multi-platform too, it had to be
+renamed. Hence, 'grit'.
+
 - 20080304, v0.8
 
   - Added shared palette and graphics options (`-pS` and `-gS`).

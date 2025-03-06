@@ -2,26 +2,23 @@
 
 ## Introduction
 
-Grit and Wingrit are a pair of converters from PC-based bitmaps to GBA readable
-graphic formats. The functionality is (roughly) the same as the exporter found
-in my bitmap editor Usenti, but these stand-alone versions can handle more file
-types by using the FreeImage graphics library (freeimage.sourceforge.net/).
+Grit and Wingrit are a pair of converters from PC-based bitmaps to GBA/NDS
+readable graphic formats. The functionality is (roughly) the same as the
+exporter found in my bitmap editor Usenti, but these stand-alone versions can
+handle more file types by using the graphics library
+[libplum](https://github.com/aaaaaa123456789/libplum).
 
 (Win)grit converts bitmaps into palettes, graphic data (tile or bitmap formats),
 tilemaps and metamaps. The output is in C arrays, asm arrays, binary files or a
-GBFS archive (tepples' GameBoy File system, see www.pineight/com). (Win)grit
+GBFS archive (tepples' GameBoy File system, see www.pineight.com). (Win)grit
 supports the three main BIOS compression formats (LZ77, huffman, RLE), as well
 as graphics bitpacking to allow graphic data of 1,2,4,8 and 16 bpp.  The data
 arrays can be in byte, halfword or word formats and a header file can be created
 with the declarations of these. The tilemapping option includes unique tile
 reduction, different map layouts and even metamapping with variable width and
-heights.  This can also be used for 1D sprite-sheet conversions.
+heights. This can also be used for 1D sprite-sheet conversions.
 
-NOTE: (Win)grit was born '(Win)git. But because the linux kernel versioning is
-also called 'git' and g(r)it's supposed to be a multi-platform too, it had to be
-renamed. Hence, 'grit'.
-
-The original author of grit is Jasper Vijn (Cearn).
+The original author of Grit is Jasper Vijn (Cearn).
 
 Contact email: cearn at coranac dot com
 
@@ -30,8 +27,8 @@ Contact email: cearn at coranac dot com
 Grit is the command-line version, the usage and option list is given below. For
 the basic CLI functionality I am indebted to gauauu (www.tolberts.net), who
 basically handed me a set of CLI functions, which proved a _lot_ easier to use
-than what I had initially planned on using. Several others (in particular Dave
-Murphy (www.devkitpro.org)) have also been helpful in making this a
+than what I had initially planned on using. Several others (in particular, Dave
+Murphy, www.devkitpro.org) have also been helpful in making this a
 multi-platform tool.
 
 ## Basic Grit usage
@@ -145,8 +142,7 @@ shared filename and symbol name can be controlled with
 
 The external tilefile is experimental too. It seems to work well enough, but
 just to be sure, always start with an 8bpp bitmap that's already tiled (or
-non-existent), and use either bmp, gif or png. Pcx support will be added later
-(FreeImage doesn't do pcx writing. That's why). I'll try to add metatiling to it
+non-existent), and use either bmp, gif or png. I'll try to add metatiling to it
 too at some point.
 
 ## Examples for common conversions
