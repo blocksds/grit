@@ -144,27 +144,16 @@ Map: no map. But if you have any map options (`-m*'), it'll default to
 Misc: no compression, create header, symbol name derived from 
   destination filename, which is derived from the source filename.
 
-
---- Palette options (base: "-p") ---
--p | -p!       Include or exclude pal data [inc]
--pu(8|16|32)   Pal data-type: u8, u16 , u32 [u16]
--pz[!lhr0]     Pal compression: off, lz77, huff, RLE, fake [off]
--ps{n}         Pal range start [0]
--pe{n}         Pal range end (exclusive) [pal size]
--pn{n}         Pal count [pal size]. Overrides -pe
--pS            NEW: shared palette
--pT{n}         Transparent palette index; swaps with index 0 [0]
-
 --- Graphics options (base: "-g") ---
 -g | -g!       Include  or exclude gfx data [inc]
 -gu(8|16|32)   Gfx data type: u8, u16, u32 [u32]
--gz[!lhr0]     Gfx compression: off, lz77, huff, RLE, fake [off]
--ga{n}         Gfx pixel offset (non-zero pixels) [0]
+-gz[!lhr0]     Gfx compression: off, lz77, huff, RLE, off+header [off]
 -gb | -gt      Gfx format, bitmap or tile [tile]
--gB{n}         Gfx bit depth (1, 2, 4, 8, 16) [img bpp]
--gS            NEW: Shared graphics
+-gB{fmt}       Gfx format / bit depth (1, 2, 4, 8, 16, a5i3, a3i5) [img bpp]
+-gx            Enable texture operations
+-gS            Shared graphics
 -gT{n}         Transparent color; rrggbb hex or 16bit BGR hex [FF00FF]
-
+                 -gT! forces alpha bit, only affects NDS
 -al{n}         Area left [0]
 -ar{n}         Area right (exclusive) [img width]
 -aw{n}         Area width [img width]. Overrides -ar
@@ -175,37 +164,51 @@ Misc: no compression, create header, symbol name derived from
 --- Map options (base: "-m") ---
 -m | -m!       Include or exclude map data [exc]
 -mu(8|16|32)   Map data type: u8, u16, u32 [u16]
--mz[!lhr0]     Map compression: off, lz77, huff, RLE, fake [off]
--mR{t,p,f}     Tile reduction: (t)iles, (p)al, (f)lipped
+-mz[!lhr0]     Map compression: off, lz77, huff, RLE, off+header [off]
+-ma{n}         Map-entry offset n (non-zero entries) [0]
+-mp{n}         Force mapsel palette to n
+-mB{n}:{(iphv[n])+}     Custom mapsel bitformat
+-mR{t,p,f}     Tile reduction: (t)iles, (p)al, (f)lipped 
                  options can be combined [-mRtpf]
 -mR[48a]       Common tile reduction combos: reg 4bpp (-mRtpf), 
                  reg 8bpp (-mRtf), affine (-mRt), respectively
 -mR!           No tile reduction (not advised)
 -mL[fsa]       Map layout: reg flat, reg sbb, affine [reg flat]
+
+--- Palette options (base: "-p") ---
+-p | -p!       Include or exclude pal data [inc]
+-pu(8|16|32)   Pal data-type: u8, u16 , u32 [u16]
+-pz[!lhr0]     Pal compression: off, lz77, huff, RLE, off+header [off]
+-ps{n}         Pal range start [0]
+-pe{n}         Pal range end (exclusive) [pal size]
+-pn{n}         Pal count [pal size]. Overrides -pe
+-pS            shared palette
+-pT{n}         Transparent palette index; swaps with index 0 [0]
 --- Meta/Obj options (base: "-M") ---
 -Mh{n}         Metatile height (in tiles!) [1]
 -Mw{n}         Metatile width (in tiles!) [1]
 -MRp           Metatile reduction (pal only) [none]
 
 --- File / var options ---
--ft[!csbgr]    File type (no output, C, GNU asm, bin, gbfs, grf) [.s]
--fr            NEW: Enable GRF-format for .c or .s
+-ft[!csbgrB]   File type (no output, C, GNU asm, bin, gbfs, grf, img/map/meta/pal) [.s]
+-fr            Enable GRF-format for .c or .s
 -fa            File append
 -fh | -fh!     Create header or not [create header]
 -ff{name}      Additional options read from flag file [dst-name.grit]
 -fx{name}      External tileset file
 -o{name}       Destination filename [based on source]
 -s{name}       Symbol base name [based from dst]
--O{name}       NEW: Destination file for shared data
--S{name}       NEW: Symbol base name for shared data
+-D{path}       Destination folder for non-shared data
+-O{name}       Destination file for shared data
+-S{name}       Symbol base name for shared data
 
 --- Misc ---
--q             Quiet mode; no report at the end
+-tc            Tiling in column-major order.
+-tw            Base tile width [8].
+-th            Base tile height [8].
 -U(8|16|32)    All data type: u8, u16, u32
 -W{n}          Warning/log level 1, 2 or 3 [1]
--Z[!lhr0]      All compression: off, lz77, huff, RLE, fake [off]
-
-New options: -fr, -ftr, -gS, -O, -pS, -S, -Z0 (et al)
+-Z[!lhr0]      All compression: off, lz77, huff, RLE, off+header [off]
 
 If you explicitly mention a destination file during a multi-source run,
 be sure to add the -fa flag and DO NOT use the -s flag. In a shared-data 
