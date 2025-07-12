@@ -18,6 +18,15 @@ with the declarations of these. The tilemapping option includes unique tile
 reduction, different map layouts and even metamapping with variable width and
 heights. This can also be used for 1D sprite-sheet conversions.
 
+Note: Grit tries to convert graphics to the requested format even if that means
+that the quality of the image has to be reduced. However, the result is usually
+much worse than if you reduce the quality beforehand with your graphics design
+tool. For example, if you're designing a background to be converted to a 4 BPP
+tiled background, make sure that the tiles can actually be expressed as 16
+palettes of 16 colors each. If you want to export a 256 color bitmap, ensure
+that your bitmap doesn't use more than 256 colors (or 255 if you want color 0 to
+be transparent!).
+
 The original author of Grit is Jasper Vijn (Cearn).
 
 Contact email: cearn at coranac dot com
