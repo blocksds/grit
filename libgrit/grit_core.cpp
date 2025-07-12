@@ -703,8 +703,8 @@ bool grit_validate(GritRec *gr)
 	// Raw binary cannot be appended
 	if(gr->fileType==GRIT_FTYPE_BIN && gr->bAppend)
 	{
-		gr->bAppend= false;
-		lprintf(LOG_WARNING, "  Can't append to binary files. Switching to override mode.");
+		lprintf(LOG_ERROR, "  Can't append to binary files.");
+		return false;
 	}
 
 	// --- ranges ---
