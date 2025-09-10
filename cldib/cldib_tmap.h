@@ -16,7 +16,7 @@
 #include "cldib_core.h"
 
 
-/*! \addtogroup grpTmap
+/*! \addtogroup grpTmap */
 /*!	\{	*/
 
 

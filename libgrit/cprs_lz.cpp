@@ -249,12 +249,12 @@ void InitTree(void)
 */
 void InsertNode(int r)
 {
-	int  i, p, cmp, prev_length;
+	int  i, p, cmp;
 	BYTE *key;
 
 	cmp= 1;  key= &text_buf[r];  p= RING_MAX + 1 + key[0];
 	rson[r]= lson[r]= NIL;  
-	prev_length= match_length= 0;
+	match_length= 0;
 	for( ; ; )
 	{
 		if(cmp >= 0)

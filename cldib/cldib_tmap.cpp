@@ -412,7 +412,7 @@ void tmap_pack(const Tilemap *tm, RECORD *dstRec, const MapselFormat *mf)
 			for(ix=0; ix<mapW; ix++)
 			{
 				*dstL++ = srcL->index() & 0xff;
-				*srcL++;
+				srcL++;
 			}
 		}
 		
@@ -435,7 +435,7 @@ void tmap_pack(const Tilemap *tm, RECORD *dstRec, const MapselFormat *mf)
 					bfSet(res, srcL->pbank(), mf->pbShift, mf->pbLen);
 
 				*dstL++ = res + mf->base;
-				*srcL++;
+				srcL++;
 			}
 		}
 	}

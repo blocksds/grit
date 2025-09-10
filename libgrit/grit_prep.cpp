@@ -472,7 +472,8 @@ bool grit_prep_map(GritRec *gr)
 
 	CLDIB *extDib= NULL;
 	int tileN= 0;
-	uint extW= 0, extH= 0, tileW= gr->tileWidth, tileH= gr->tileHeight;
+	uint extW= 0, __attribute__((unused)) extH= 0;
+	uint tileW= gr->tileWidth, tileH= gr->tileHeight;
 	uint mtileW= gr->mtileWidth(), mtileH= gr->mtileHeight();
 
 	if(gr->gfxIsShared)
