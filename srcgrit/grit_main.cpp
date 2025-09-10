@@ -919,7 +919,8 @@ void args_gather(strvec &args, int argc, char **argv)
 	{
 			fgets(str, MAXPATHLEN, fp);
 		// Find comment and end string there
-		if( pstr= strchr(str, '#') )
+		pstr= strchr(str, '#');
+		if( pstr )
 			*pstr= '\0';
 		
 		// Tokenize arguments

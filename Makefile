@@ -102,8 +102,7 @@ WARNFLAGS_C	+= -Wno-implicit-function-declaration
 
 WARNFLAGS_CXX	:= -Wall -Wno-misleading-indentation -Wno-unused-result \
 		   -Wno-unused-variable -Wno-sign-compare \
-		   -Wno-parentheses -Wno-format-truncation \
-		   -Wno-class-memaccess
+		   -Wno-format-truncation -Wno-class-memaccess
 
 ifeq ($(SOURCES_CPP),)
     HOSTLD	:= $(HOSTCC)

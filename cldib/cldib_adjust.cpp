@@ -321,7 +321,7 @@ bool dib_pixel_replace(CLDIB *dib, DWORD dst[], DWORD src[], int nn)
 			{
 				for(jj=0; jj<nn; jj++)
 				{
-					if(dibL[ii]= dst[jj])
+					if(dibL[ii]== dst[jj])
 					{
 						dibL[ii]= src[jj];
 						break;
