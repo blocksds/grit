@@ -651,8 +651,9 @@ bool grit_validate(GritRec *gr)
 	int bpp= gr->gfxBpp;
 	switch(bpp)
 	{
-	case 0:
+	case 0: // By default set bpp to 8
 		gr->gfxBpp=8;
+		// Fallthrough
 	case 1: case 2: case 4: case 8:
 		if(gr->texModeEnabled && !gr->palEndSet)
 		{

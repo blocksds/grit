@@ -377,12 +377,17 @@ fnDibSave dib_set_save_proc(fnDibSave proc)
 //! Default/dummy file-reader (does nothing)
 CLDIB *dib_load_dflt(const char *fpath, void *extra)
 {
+	(void)fpath;
+	(void)extra;
 	return NULL;
 }
 
 //! Default/dummy file-writer (does nothing)
 bool dib_save_dflt(const CLDIB *dib, const char *fpath, void *extra)
 {
+	(void)dib;
+	(void)fpath;
+	(void)extra;
 	return false;
 }
 

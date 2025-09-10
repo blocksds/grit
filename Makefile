@@ -100,7 +100,7 @@ WARNFLAGS_C	:= -Wall \
 # If it ever becomes necessary, the linking will fail regardless.
 WARNFLAGS_C	+= -Wno-implicit-function-declaration
 
-WARNFLAGS_CXX	:= -Wall -Wno-unused-result -Wno-sign-compare \
+WARNFLAGS_CXX	:= -Wall -Wextra -Wno-unused-result -Wno-sign-compare \
 		   -Wno-format-truncation -Wno-class-memaccess
 
 ifeq ($(SOURCES_CPP),)

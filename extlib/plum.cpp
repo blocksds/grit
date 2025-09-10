@@ -105,6 +105,8 @@ CLDIB *plum2dib(struct plum_image *fi)
 */
 CLDIB *cldib_load(const char *fpath, void *extra)
 {
+	(void)extra;
+
 	unsigned error;
 	struct plum_image *image = plum_load_image_limited(fpath, PLUM_MODE_FILENAME, CLDIB_PLUM_COLOR_FORMAT | PLUM_PALETTE_LOAD,
 		16384 * 16384, &error);
@@ -121,6 +123,8 @@ CLDIB *cldib_load(const char *fpath, void *extra)
 
 bool cldib_save(const CLDIB *dib, const char *fpath, void *extra)
 {
+	(void)extra;
+
 	struct plum_image *image = dib2plum((CLDIB*) dib);
 
 	if(image == NULL)

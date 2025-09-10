@@ -309,7 +309,7 @@ bool grit_prep_item(GritRec *gr, eint id, DataItem *item)
 		return true;
 
 	case GRIT_ITEM_METAMAP:		// Metamap item
-		item->procMode= gr->isMetaTiled() ? gr->mapProcMode : GRIT_EXCLUDE;
+		item->procMode= gr->isMetaTiled() ? gr->mapProcMode : (echar)GRIT_EXCLUDE;
 		item->dataType= gr->mapDataType;
 		item->compression= gr->mapCompression;
 		item->pRec= &gr->_metaRec;	
@@ -1039,6 +1039,7 @@ bool grit_xp_grf(GritRec *gr)
 */
 bool grit_xp_o(GritRec *gr)
 {
+	(void)gr;
 	return true;
 }
 

@@ -568,6 +568,8 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 */
 int grit_parse_log(GritRec *gr, const strvec &args)
 {
+	(void)gr;
+
 	char *pstr= CLI_STR("-W", "");
 
 	switch(pstr[0])
@@ -734,6 +736,8 @@ bool grit_parse_shared(GritRec *gr, const strvec &args)
 
 bool grit_prep_shared_output(GritRec*gr, const strvec &args)
 {
+	(void)args;
+
 	if(!gr->gfxIsShared)
 		gr->gfxProcMode &= ~GRIT_OUTPUT;
 		
