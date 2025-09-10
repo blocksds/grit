@@ -54,6 +54,7 @@ bool dib_adjust(CLDIB *dib, BYTE lut[], enum eClrChannel cce)
 				dibL += dibP;
 			}
 		}
+		break;
 	default:
 		return false;
 	}
@@ -313,6 +314,7 @@ bool dib_pixel_replace(CLDIB *dib, DWORD dst[], DWORD src[], int nn)
 				dibL += dibP;
 				rgbt= (RGBTRIPLE*)dibL;
 			}
+			break;
 		}
 	case 32:		// UNTESTED
 		{
