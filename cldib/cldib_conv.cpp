@@ -260,7 +260,7 @@ CLDIB *dib_8_to_true_copy(CLDIB *src, int dstB)
 
 	int srcW= dib_get_width(src);
 	int srcH= dib_get_height(src);
-	int srcB= dib_get_bpp(src);
+	//int srcB= dib_get_bpp(src);
 
 	CLDIB *dst= dib_alloc(srcW, srcH, dstB, NULL, dib_is_topdown(src));
 
@@ -655,7 +655,8 @@ bool data_true_to_true(void *dstv, const void *srcv, int srcS,
 	}
 
 	int ii, nn;
-	BYTE *srcD= (BYTE*)srcv, *dstD= (BYTE*)dstv;
+	BYTE *srcD= (BYTE*)srcv;
+	//BYTE *dstD= (BYTE*)dstv;
 
 	switch(dstB)
 	{

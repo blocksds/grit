@@ -31,7 +31,7 @@ inline CLDIB *_img##Load(const char *fpath)	    \
 #define IMG_SAVE_DEF(_img)                                  \
 inline CLDIB *_img##Save(const char *fpath, CLDIB *dib)     \
 {	C##_img##File img; img.Attach(dib);                     \
-    bool bOK=img.Save(fpath); return img.Detach();   }
+    /*bool bOK=*/img.Save(fpath); return img.Detach();   }
 
 // === IMG base =======================================================
 

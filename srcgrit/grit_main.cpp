@@ -806,7 +806,7 @@ bool grit_load_ext_tiles(GritRec *gr)
 		return false;
 	}
 
-	CLDIB *dib= NULL, *dib2= NULL;
+	CLDIB *dib= NULL;
 	dib= dib_load(grs->tilePath, NULL);
 
 	if(dib == NULL)
@@ -1194,7 +1194,7 @@ int run_main(int argc, char **argv)
 	for(ii=0; ii<args.size(); ii++)
 		free(args[ii]);
 
-		log_exit();
+	log_exit();
 
 	return result;
 }

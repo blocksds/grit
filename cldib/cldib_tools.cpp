@@ -214,7 +214,8 @@ bool data_redim(const RECORD *src, RECORD *dst, int tileH, int tileN)
 	}
 	else					// --- array -> matrix
 	{
-		int tileW= srcW, tileS= tileW*tileH;
+		int tileW= srcW;
+		//int tileS= tileW*tileH;
 
 		if(tileN<=0 || tileN*tileH>srcH)
 			tileN= srcH/tileH;

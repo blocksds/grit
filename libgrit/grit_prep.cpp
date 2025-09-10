@@ -382,7 +382,8 @@ bool grit_prep_tiles(GritRec *gr)
 	lprintf(LOG_STATUS, "Tile preparation.\n");
 
 	// Main sizes
-	int imgW= dib_get_width(gr->_dib), imgH= dib_get_height(gr->_dib);
+	//int imgW= dib_get_width(gr->_dib);
+	int imgH= dib_get_height(gr->_dib);
 	int tileW= gr->tileWidth, tileH= gr->tileHeight;
 	int metaW= gr->metaWidth, metaH= gr->metaHeight;
 
@@ -601,7 +602,7 @@ bool grit_prep_gfx(GritRec *gr)
 	lprintf(LOG_STATUS, "Graphics preparation.\n");		
 
 	int srcB= dib_get_bpp(gr->_dib);	// should be 8 or 16 by now
-	int srcP= dib_get_pitch(gr->_dib);
+	//int srcP= dib_get_pitch(gr->_dib);
 	int srcS= dib_get_size_img(gr->_dib);
 	BYTE *srcD= dib_get_img(gr->_dib);
 
@@ -752,8 +753,8 @@ bool grit_prep_shared_pal(GritRec *gr)
 	for(ii=0; ii<nclrs; ii++)
 		palOut[ii]= RGB16(palIn[ii].rgbBlue, palIn[ii].rgbGreen, palIn[ii].rgbRed);
 
-    for(ii = nclrs; ii < 256; ii++)
-        palOut[ii] = 0;
+	for(ii = nclrs; ii < 256; ii++)
+		palOut[ii] = 0;
 
 	RECORD rec= { 2, palS/2, (BYTE*)palOut };
 
