@@ -131,6 +131,7 @@ const char appHelpText[]=
 "-th            Base tile height [8].\n"
 //"-q             Quiet mode; no report at the end\n"
 "-U(8|16|32)    All data type: u8, u16, u32\n"
+"-V             Print grit version string and exit.\n"
 "-W{n}          Warning/log level 1, 2 or 3 [1]\n"
 "-Z[!lhr0]      All compression: off, lz77, huff, RLE, off+header [off]\n"
 "\n";
@@ -1205,6 +1206,12 @@ int run_main(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+	if (argc == 2 && !strcmp(argv[1], "-V"))
+	{
+		fprintf(stdout, "%s\n", appIdent);
+		return EXIT_SUCCESS;
+	}
+
 	if( argc < 2 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "--help") )
 	{
 		fprintf(stdout, "--- %s ---\n", appIdent);

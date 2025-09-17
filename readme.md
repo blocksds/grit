@@ -141,6 +141,7 @@ are given in brackets in the list below. but for easy reference, here's a list:
 -tw            Base tile width [8].
 -th            Base tile height [8].
 -U(8|16|32)    All data type: u8, u16, u32
+-V             Print grit version string and exit.
 -W{n}          Warning/log level 1, 2 or 3 [1]
 -Z[!lhr0]      All compression: off, lz77, huff, RLE, off+header [off]
 ```
