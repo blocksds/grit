@@ -26,7 +26,7 @@
 
 
 static const char __grit_app_string[]=
-"\tExported by Cearn's GBA Image Transmogrifier, " VERSION_ID "\n"
+"\tExported by Cearn's GBA Image Transmogrifier, " VERSION_STRING "\n"
 "\t( http://www.coranac.com/projects/#grit )";
 
 

@@ -61,10 +61,10 @@ void grit_dump_short(GritRec *gr, FILE *fp, const char *pre);
 
 // --- Application constants ---
 
-const char appIdent[]= "grit " VERSION_ID;
+const char appIdent[]= "grit " VERSION_STRING;
 
 const char appHelpText[]= 
-"GRIT: GBA Raster Image Transmogrifier. (grit " VERSION_ID ")\n"
+"GRIT: GBA Raster Image Transmogrifier. (grit " VERSION_STRING ")\n"
 "  Converts bitmap files into something the GBA can use.\n"
 "usage: grit srcfile(s) [args]\n\n"
 "\n--- Graphics options (base: \"-g\") ---\n"
@@ -1168,7 +1168,7 @@ int run_main(int argc, char **argv)
 		if(gr == NULL)
 			throw "Couldn't allocate GritRec memory.\n";
 
-		lprintf(LOG_STATUS, "---%s ---\n", appIdent);
+		lprintf(LOG_STATUS, "--- %s ---\n", appIdent);
 
 		// --- Run according to share-mode ---
 		args_set_mode(gr->shared, args, fpaths);
@@ -1207,7 +1207,7 @@ int main(int argc, char **argv)
 {
 	if( argc < 2 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "--help") )
 	{
-		fprintf(stdout, "---%s ---\n", appIdent);
+		fprintf(stdout, "--- %s ---\n", appIdent);
 		fputs(appHelpText, stdout);
 		return EXIT_SUCCESS;
 	}
