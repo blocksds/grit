@@ -31,6 +31,8 @@ The original author of Grit is Jasper Vijn (Cearn).
 
 Contact email: cearn at coranac dot com
 
+Please, report issues [here](https://github.com/blocksds/sdk/issues).
+
 ## Grit
 
 Grit is the command-line version, the usage and option list is given below. For
