@@ -553,7 +553,7 @@ bool grit_prep_map(GritRec *gr)
 	//# TODO: allow custom mapsel format.
 	mf= gr->msFormat;
 
-	tileN= tmap_get_tilecount(metaMap);
+	tileN= tmap_get_tilecount(map);
 	if(tileN >= (1<<mf.idLen))
 		lprintf(LOG_WARNING, "  Number of tiles (%d) exceeds field limit (%d).\n", 
 			tileN, 1<<mf.idLen);
