@@ -71,10 +71,15 @@ bool grit_prep(GritRec *gr)
 	if(gr->isTiled())
 	{
 		if(gr->isMapped())		// Convert to tilemap/tileset
-			grit_prep_map(gr);
+		{
+			if(!grit_prep_map(gr))
+				return false;
+		}
 		else					// Just (meta)tile the image.
+		{
 			//# TODO: just (meta)tile; no map.
 			grit_prep_tiles(gr);
+		}
 	}
 
 /* OLD
@@ -508,8 +513,11 @@ bool grit_prep_map(GritRec *gr)
 		mf= c_mapselGbaText;
 		tileN= tmap_get_tilecount(metaMap);
 		if(tileN >= (1<<mf.idLen))
-			lprintf(LOG_WARNING, "  Number of metatiles (%d) exceeds field limit (%d).\n", 
+		{
+			lprintf(LOG_ERROR, "Number of metatiles (%d) exceeds field limit (%d).\n", 
 				tileN, 1<<mf.idLen);
+			return false;
+		}
 
 		tmap_pack(metaMap, &metaRec, &mf);
 		if( BYTE_ORDER == BIG_ENDIAN && mf.bitDepth > 8 )
@@ -555,8 +563,11 @@ bool grit_prep_map(GritRec *gr)
 
 	tileN= tmap_get_tilecount(map);
 	if(tileN >= (1<<mf.idLen))
-		lprintf(LOG_WARNING, "  Number of tiles (%d) exceeds field limit (%d).\n", 
+	{
+		lprintf(LOG_ERROR, "Number of tiles (%d) exceeds field limit (%d).\n", 
 			tileN, 1<<mf.idLen);
+		return false;
+	}
 
 	tmap_pack(map, &mapRec, &mf);
 
