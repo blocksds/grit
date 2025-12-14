@@ -86,7 +86,7 @@ CLDIB *dib_alloc(int width, int height, int bpp, const BYTE *data,
 	if(dib == NULL)
 		return NULL;
 
-	dib->data= (BYTE*)calloc(sizeof(BYTE), BMIH_SIZE + nclrs*RGB_SIZE + dibS);
+	dib->data= (BYTE*)calloc(BMIH_SIZE + nclrs*RGB_SIZE + dibS, sizeof(BYTE));
 	if(dib->data == NULL)
 	{
 		free(dib);
