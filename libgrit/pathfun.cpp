@@ -766,7 +766,7 @@ bool xp_array_gas(FILE *fp, const char *symname,
 	if(fp == NULL || symname == NULL || data == NULL)
 		return false;
 
-	fputs("\t.section .rodata\n\t.align\t2\n", fp);
+	fputs("\t.section .rodata\n\t.balign\t4\n", fp);
 	// NOTE: no EOL break
 	fprintf(fp, "\t.global %s\t\t@ %d unsigned chars\n", 
 		symname, ALIGN4(len));
