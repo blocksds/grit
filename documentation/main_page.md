@@ -3,23 +3,48 @@ Grit: GBA Image Transmogrifier {#mainpage}
 
 ## 1. Introduction
 
-The GBA Image Transmogrifier (“grit” for short) is a bitmap conversion tool for
-GBA/NDS development. It accepts a multitude of file types (bmp, pcx, png, gif,
-etc) at any bitdepth and can convert them to palette, graphics and/or map data
-that can be used directly in GBA code. The output formats are C/asm arrays, raw
-binary files GBFS files, and a RIFF-format I call GRF. The data can be
-compressed to fit the BIOS decompression routines.
+The GBA Image Transmogrifier ("grit" for short) is a bitmap conversion tool for
+GBA/NDS development. It accepts a multitude of file types (by using the graphics
+library [libplum](https://github.com/aaaaaa123456789/libplum)) at any bitdepth
+and can convert them to palette, graphics and/or map data that can be used
+directly in GBA code. The output formats are C/asm arrays, raw binary files GBFS
+files (tepples' GameBoy File system, see www.pineight.com), and a RIFF-format I
+call GRF. The data can be compressed to fit the BIOS decompression routines
+(LZ77, Huffman, RLE), as well as graphics bitpacking to allow graphic data of
+1,2,4,8 and 16 bpp. The data arrays can be in byte, halfword or word formats
+and a header file can be created with the declarations of these.
 
 Grit can do more than simply turn bitmap into arrays. It allows you to crop or
 enlarge the original work area, convert between bitdepths, break the images up
 into tiles or metatiles and supports NDS bitmaps with transparency. It also has
 a number of tile-mapping options: it can take the bitmap and turn it into a
 tilemap (and metamap) and a set of unique tiles. It can also merge the palettes
-or tilesets from multiple files.
+or tilesets from multiple files. The tilemapping option includes unique tile
+reduction, different map layouts and even metamapping with variable width and
+heights. This can also be used for 1D sprite-sheet conversions.
 
 If you need more, feel free to add your own code. This is an open-source project
 and the code should compile on all platforms, though you'll have to write your
 own makefiles for non-Windows environments.
+
+Note: Grit tries to convert graphics to the requested format even if that means
+that the quality of the image has to be reduced. However, the result is usually
+much worse than if you reduce the quality beforehand with your graphics design
+tool. For example, if you're designing a background to be converted to a 4 BPP
+tiled background, make sure that the tiles can actually be expressed as 16
+palettes of 16 colors each. If you want to export a 256 color bitmap, ensure
+that your bitmap doesn't use more than 256 colors (or 255 if you want color 0 to
+be transparent!).
+
+The original author of Grit is Jasper Vijn (Cearn). For the basic CLI
+functionality I am indebted to gauauu (www.tolberts.net), who basically handed
+me a set of CLI functions, which proved a _lot_ easier to use than what I had
+initially planned on using. Several others (in particular, Dave Murphy,
+www.devkitpro.org) have also been helpful in making this a multi-platform tool.
+
+Contact email: cearn at coranac dot com
+
+Please, report issues [here](https://github.com/blocksds/sdk/issues).
 
 ## 2. List of options
 
@@ -270,7 +295,115 @@ wring or missing here, please let me know.
 
 ## 4. Examples
 
-TODO
+### 4.1 Basic Grit usage
+
+The basic format for using grit is:
+
+```
+grit srcfiles [opts]
+```
+
+That is, `grit`, source bitmap(s) followed by any combination of options.
+Example for conversion of foo.bmp into a set of 16x16p 4bpp sprites, using only
+the first 16 palette entries, to 16bit C arrays:
+
+```
+grit foo.bmp -Mw 2 -Mh 2 -gB4 -pe 16 -U16 -ftc
+```
+
+Grit is relatively lenient in terms of what you enter. For one, it searches out
+_correct_ options, so that incorrect or options are simply ignored, as are later
+version of option types in the case of multiple instances. Most options consist
+of a `base` and a `value`; the space between the two is optional. For example,
+the bitdepth option in the example (`-gB4`) would also have been excepted as
+`-gB 4`. There is also a complex system of defaults to simplify the input. These
+are given in brackets in the list below. but for easy reference, here's a list:
+
+- Palette: full source palette, u16 C array
+
+- Graphics: full image, original bpp (kinda). Paletted images default to tiles,
+  true-color will be 16bpp bitmaps. u32 C arrays
+
+- Map: no map. But if you have any map options (`-m*`), it will default to a
+  flat regular tilemap, reduced for tiles and flips. u16 C array
+
+- Misc: no compression, create header, symbol name derived from destination
+  filename, which is derived from the source filename.
+
+If you explicitly mention a destination file during a multi-source run, be sure
+to add the `-fa` flag and DO NOT use the `-s` flag. In a shared-data run, the
+shared filename and symbol name can be controlled with
+
+The external tilefile is experimental too. It seems to work well enough, but
+just to be sure, always start with an 8bpp bitmap that's already tiled (or
+non-existent), and use either bmp, gif or png. I'll try to add metatiling to it
+too at some point.
+
+### 4.2 Examples for common conversions
+
+Mode 0 map (=regular), 4bpp tiles, tile/pal/flip reduced, sbb format:
+```
+-gt -gB4 -mRtpf -mLs
+```
+or
+```
+-gB4 -mR4 -mLs
+```
+
+Mode 2 map (=affine), tile reduced, map in bytes:
+```
+-gt -gB8 -mRt -mLa -mu8
+```
+Mode 3 or 5 bitmap:
+```
+-gb -gB16
+```
+
+Mode 4 bitmap, forced to screen size:
+```
+-gb -gB8 -aw 240 -ah 160
+```
+
+Sprite, 4bpp, 16x16p (=2x2t):
+```
+-gt -gB4 -Mw2 -Mh2
+```
+
+Sprite, 4bpp using pal16-bank 4 (colors 0x40 - 0x4F):
+```
+-gt -gB4 -ps 0x40 -pn 16
+```
+or
+```
+-gt -gB4 -ps 0x40 -pe 0x50
+```
+
+Mode 0 metamap, 4x3 metatiles, full tileset reduction:
+```
+-gt -gB4 -mR4 -Mw 4 -Mh 3
+```
+
+NDS 16bpp bitmap, with cyan as transparent color:
+```
+-gb -gB16 -gT 00FFFF
+```
+
+Shared data: multi-bitmap to tilemaps + single tileset conversion.  If you want
+to convert a number of bitmaps to a single tileset and multiple maps, use `-gS`.
+If you want to save the tileset, or want to use a pre-made tileset, use `-fx`.
+
+The output of this example is a single file with the combined tileset as
+`sharedTiles`, its palette as `sharedPal` and the separate maps as `a1Map`,
+`a2Map`, `a3Map`.
+
+```
+GRIT    := $(BLOCKSDS)/tools/grit/grit
+PNGS    := a1.png a2.png a3.png
+TILESET := tiles.png
+
+tilemap.s : $(PNGS)
+	$(GRIT) $^ -o $@ -fa -gS -Sshared -mR8
+```
 
 ## 5. Additional information
 
