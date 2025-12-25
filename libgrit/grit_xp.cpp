@@ -889,18 +889,17 @@ chunk_t *chunk_merge(const char *id, chunk_t *cklist[], uint count, const char *
 	chunk_t *chunk;
 	u8 *dst;
 
-	// Make room for groupsID + total_size + ID + size + data
-	chunk= (chunk_t*)malloc(size+12+8);
+	// Make room for groupsID + total_size + ID + data
+	chunk= (chunk_t*)malloc(size+12+4);
 	chunk_t *sub= (chunk_t*)chunk->data;
 	for(ii=0; ii<4; ii++)
 		chunk->id[ii]= groupID[ii];
-	chunk->size= size+8;
+	chunk->size= size+4;
 
 	for(ii=0; ii<4; ii++)
 		sub->id[ii]= id[ii];
-	sub->size= size;
 
-	dst= chunk->data+8;
+	dst= chunk->data+4;
 
 	for(ii=0; ii<count; ii++)
 	{
