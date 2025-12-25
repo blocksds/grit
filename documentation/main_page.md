@@ -50,27 +50,45 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 
 ### 2.1 Graphics options
 
-- `-g`: Include graphics in output.
+Export options:
+
+- `-g`: Include graphics in output (default).
 - `-g!`: Exclude graphics from output.
+
+Graphics type:
+
 - `-gb`: Bitmapped graphics output. NOTE: without an `-gT` option, this data
   will have a clear bit 15.
 - `-gt`: Tiled graphics output (default).
-- `-ga <n>`: Pixel offset for non-zero pixels. Useful if the associated palette
-  is at an offset.
+- -`gx`: Enable texture mode. You must also use `-gb`.
+
+Format of the output:
+
 - `-gB <n>`: Bit depth of the output. Can be 1, 2, 4, 8 or 16. 16 bpp is a
   truecolor mode, the rest are paletted. If the source image is not of this
-  bitdepth yet, it will be converted.
-- `-gS`: Shared graphics. Build up a shared tileset for the multiple images. See
-  also `-fx`, `-S` and `-O`.
+  bitdepth yet, it will be converted. It defaults to the bit depth of the
+  original image.
+- `-ga <n>`: Pixel offset for non-zero pixels (this value is added to all
+  non-zero pixels of the output). Useful if the associated palette is at an
+  offset.
+
+Transparency options:
+
 - `-gT [ <h> ]`: Transparent color. The color should be a 16bit BGR color or
   24bit RGB color in hex. For truecolor output, all pixels will have the
   alpha-bit set except this color. For paletted output, this color will be
-  transferred into index 0.
+  transferred into index 0. The default is `FF00FF` (magenta).
 - `-gT!`: No transparent pixels / set the alpha-bit of the pixels. Only has
   effect for NDS bitmaps.
+
+C type used for the data arrays:
+
 - `-gu8`: Graphics data is in byte arrays.
 - `-gu16`: Graphics data is in halfword arrays.
 - `-gu32`: Graphics data is in word arrays (default).
+
+Graphics compression:
+
 - `-gz!`: Graphics data is not compressed. (default)
 - `-gz0`: As `-gz!`, but with a 32-bit compression header similar to the ones
   used by the GBA/NDS BIOS. Byte 0: 0x00. Bytes 1-3: size of data.
@@ -78,12 +96,21 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-gzl`: Graphics data is LZ77 compressed.
 - `-gzr`: Graphics data is RLE compressed.
 
+Shared graphics options:
+
+- `-gS`: Shared graphics. Build up a shared tileset for the multiple images. See
+  also `-fx`, `-S` and `-O`.
+
 ### 2.2 Area options
+
+By default, the area used to generate graphics is as big as the image. You can
+reduce it with the following options:
 
 - `-ab <n>`: Bottom side of the work bitmap's rectangle. If this falls outside
   of the source bitmap, the latter will be extended.
 - `-ah <n>`: Height side of the work bitmap's rectangle. If this makes the
   bottom fall outside of the source bitmap, the latter will be extended.
+  Overrides `-ab`.
 - `-al <n>`: Left side of the work bitmap's rectangle. If this falls outside of
   the source bitmap, the latter will be extended.
 - `-ar <n>`: Right side of the work bitmap's rectangle. If this falls outside of
@@ -91,14 +118,25 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-at <n>`: Top side of the work bitmap's rectangle. If this falls outside of
   the source bitmap, the latter will be extended.
 - `-aw <n>`: Width of the work bitmap's rectangle. If this makes the right side
-  fall outside of the source bitmap, the latter will be extended.
+  fall outside of the source bitmap, the latter will be extended. Overrides
+  `-ar`.
 
 ### 2.3 Map options
 
+Export options:
+
 - `-m`: Include map in output. Enables tile-mapping of the image.
 - `-m!`: Exclude map from output (default).
-- `-ma <n>`: Tile index offset (non-zero indices only). Useful if you intend to
-  load the tiles at an offset.
+
+Format of the output:
+
+- `-ma <n>`: Tile index offset for non-zero indices (this value is added to all
+  non-zero pixels of the output). Useful if you intend to load the tiles at an
+  offset.
+- `-mp <n>`: Forces the palette-bank index to `n`.
+
+Custom map format options:
+
 - `-mB...`: Custom mapsel (map('s?) element) bitformat. The regexp format for it
   is `"-mB((\d+):)([iphv_]\d*)+"`, that is, `"-mB"`, followed by the bitdepth of
   the mapsel, a colon and a character-number pattern indicating the big-endian
@@ -112,13 +150,18 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 
   For example, the Text-BG mapsel format is: `"16:p4vhi10"`
 
+Map layout options:
+
 - `-mLa`: Map layout for affine tilemaps: 8-bit screen entries and a flat map.
 - `-mLf`: Map layout for regular backgrounds. 16-bit entries, but a flat map
-  (i.e., not broken down into screenblocks).
+  (i.e., not broken down into screenblocks). This is also used for extended
+  affine backgrounds in NDS.
 - `-mLs`: Map layout for regular backgrounds. 16-bit entries, broken down into
   screenblocks.
-- `-mp <n>`: Forces the palette-bank index to `n`.
-- `-mR!`: Disable tile reduction for tilemaps.
+
+Map reduction options:
+
+- `-mR!`: Disable tile reduction for tilemaps. Not advised in general.
 - `-mR4`: Tile reduction combo for regular backgrounds with 4bpp tiles: tile,
   palette and flip reduction.
 - `-mR8`: Tile reduction combo for regular backgrounds with 8bpp tiles: tile and
@@ -127,13 +170,19 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-mRf`: Tile reduction option: reduce for flipped tiles. Can be combined with
   `t` and `p` reduction options (example: `-mRtpf`).
 - `-mRp`: Tile reduction option: reduce for 16-color palette banks. Can be
-  combined with t and f reduction options (example: `-mRtpf`). Do not use this
-  for 8bpp tiles, you'll regret it.
+  combined with `t` and `f` reduction options (example: `-mRtpf`). Do not use
+  this for 8bpp tiles, you'll regret it.
 - `-mRt`: Tile reduction option: reduce for unique tiles. Can be combined with p
   and f reduction options (example: `-mRtpf`).
+
+C type used for the data arrays:
+
 - `-mu8`: Map data is in byte arrays.
 - `-mu16`: Map data is in halfword arrays (default).
 - `-mu32`: Map data is in word arrays.
+
+Graphics compression:
+
 - `-mz!`: Map data is not compressed. (default)
 - `-mz0`: As `-mz!`, but with a 32-bit compression header similar to the ones
   used by the GBA/NDS BIOS. Byte 0: 0x00. Bytes 1-3: size of data.
@@ -142,6 +191,8 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-mzr`: Map data is RLE compressed.
 
 ### 2.4. Metamap/object options
+
+By default this is disabled (width and height are 1, and no reduction is done).
 
 - `-Mh`: Metatile height. Useful for keeping the tiles in a metatile/object
   together. If tile-mapping is enabled, this will enable metamapping. Works
@@ -153,26 +204,36 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 
 ### 2.5. Palette options
 
+Export options:
+
 - `-p`: Include palette in output (default).
 - `-p!`: Exclude palette from output.
+
+Format of the output:
+
+- `-ps <n>`: Starting palette entry. `-ps` 16 would start the export at color
+  16. Works together with `-pe` and `-pn`.
 - `-pe <n>`: End' palette entry. For example, `-pe` 32 would output the palette
   up to, but not including, color 32. Works together with `-ps`.
 - `-pn <n>`: Number of palette entries. Works together with `-ps`; overrules
   `-pe`.
-- `-ps <n>`: Starting palette entry. `-ps` 16 would start the export at color
-  16. Works together with `-pe` and `-pn`.
-- `-pS`: Shared palette data. The colors of the source bitmaps are merged into a
-  single palette. See also `-O` and `-S`. NOTE: will alter the order of the
-  original palette (unless the first bitmap happened to have all the colors in
-  it (hint, hint)).
+
+Transparency options:
+
 - `-pT <n>`: Transparent palette index. Only works if the input or output is
   paletted. For paletted output, it'll swap the transparent index with index 0
   so that that becomes the transparent index. For paletted to truecolor
   conversion, the color of the transparent index will be used for transparency,
   working as a `-gT` option.
+
+C type used for the data arrays:
+
 - `-pu8`: Palette data is in byte arrays.
 - `-pu16`: Palette data is in halfword arrays (default).
 - `-pu32`: Palette data is in word arrays.
+
+Graphics compression:
+
 - `-pz!`: Palette data is not compressed. (default)
 - `-pz0`: As `-pz!`, but with a 32-bit compression header similar to the ones
   used by the GBA/NDS BIOS. Byte 0: 0x00. Bytes 1-3: size of data.
@@ -180,54 +241,100 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-pzl`: Palette data is LZ77 compressed.
 - `-pzr`: Palette data is RLE compressed.
 
+Shared graphics options:
+
+- `-pS`: Shared palette data. The colors of the source bitmaps are merged into a
+  single palette. See also `-O` and `-S`. NOTE: will alter the order of the
+  original palette (unless the first bitmap happened to have all the colors in
+  it (hint, hint)).
+
 ### 2.6. Input/output options
+
+Append mode:
 
 - `-fa`: Append to output file instead of overwriting. If data with the symbol
   name already exists in the file, it will be replaced. Has no effect for binary
   output.
-- `-ff <path>`: Flag file for additional options. Instead of adding all the
-  options to the makefile, you can use an external file to store and modify
-  them.
+
+C header generation options:
+
 - `-fh`: Create header file with declarations and array length definitions
-  (using array-name + Len).
+  (using array-name + Len). This is the default.
 - `-fh!`: Do not create header file with declarations.
-- `-fr`: Group the separate arrays into a GRF-formatted array. See also `-ftr`.
+
+GRF options:
+
+- `-fr`: Enables GRF format for .c and .s files. It groups the separate arrays
+  into a GRF-formatted array. See also `-ftr`.
+
+File type export options:
+
 - `-ftb`: Export to binary files. Each array will have its own file: palettes
   will go into `*.pal.bin`; graphics data into `*.img.bin`; map data into
   `*.map.bin`; metamap data into `*.meta.bin`.
+- `-ftB`: Export to binary files. Each array will have its own file: palettes
+  will go into `*.pal`; graphics data into `*.img`; map data into `*.map`;
+  metamap data into `*.meta`.
 - `-ftc`: Export to C arrays.
 - `-ftg`: Export to [PinEight GBFS](http://www.pineight.com) format. Note that
   the GBFS entry names are limited to 24 characters, 6 of which are already used
   for data affixes.
 - `-ftr`: Export to GRF (Grit RIFF).
 - `-fts`: Export to GNU assembly arrays. Default output filetype.
+
+External configuration options:
+
+- `-ff <path>`: Flag file for additional options. Instead of adding all the
+  options to the makefile, you can use an external file to store and modify
+  them.
+
+External tileset options:
+
 - `-fx <path>`: External tileset bitmap which can then be shared between
   different tilemaps. Implies `-gS`. **NOTE**. This is still a little fickle.
   The file must already be in the correct format: a column or reduced tiles with
   8bpp. If the file-type does not support 8bpp, a `.bmp` of the same name will
   be used.
+
+Destination options:
+
 - `-o <path>`: Output file path.
-- `-O <path>`: Output file path for shared data.
 - `-s <name>`: Base name for array symbols. Invalid identifier characters will
   be replaced by underscores. If this option is not given, then the name follows
   from the output title, or from the input title if `-fa` is given.
+
+Shared data options:
+
+- `-O <path>`: Output file path for shared data.
+- `-D <path>`: Destination folder for non-shared data.
 - `-S <path>`: Base name for symbols for shared data.
 
 ### 2.7. Misc options
+
+Tile configuration options:
 
 - `-tc`: Tiling is done in column-major order, instead of row-major. This can be
   useful for horizontal scrollers, or efficient tile rendering.
 - `-th <n>`: Set height of basic tile (default: 8).
 - `-tw <n>`: Set width of basic tile (default: 8).
+
+Global overrides for C type used for the data arrays:
+
 - `-U8`: Set all output to use byte arrays.
 - `-U16`: Set all output to use halfword arrays.
 - `-U32`: Set all output to use word arrays.
+
+Global overrides for compression options:
+
 - `-Z!`: Set all output to use no compression.
 - `-Z0`: As `-Z!`, but with a 32-bit compression header similar to the ones
   used by the GBA/NDS BIOS. Byte 0: 0x00. Bytes 1-3: size of data.
 - `-Zh`: Set all output to use 8-bit Huffman compression.
 - `-Zl`: Set all output to use LZ77 compression.
 - `-Zr`: Set all output to use RLE compression.
+
+Verbosity options:
+
 - `-W1`: Log error messages.
 - `-W2`: Log errors and warning messages.
 - `-W3`: Log error, warning and status messages. There are a _lot_ of status
@@ -235,6 +342,10 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 - `-We`: See `-W1`.
 - `-Ws`: See `-W2`.
 - `-Ww`: See `-W3`.
+
+Version options:
+
+- `-V`: Print grit version string and exit.
 
 ## 3. DWIM
 
