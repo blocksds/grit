@@ -137,7 +137,7 @@ DEPS		:= $(OBJS:.o=.d)
 # Targets
 # -------
 
-.PHONY: all clean install
+.PHONY: all clean docs install
 
 all: $(ELF)
 
@@ -148,6 +148,10 @@ $(ELF): $(OBJS)
 clean:
 	@echo "  CLEAN  "
 	$(V)$(RM) $(ELF) $(BUILDDIR)
+
+docs:
+	@echo "  DOXYGEN"
+	doxygen Doxyfile
 
 INSTALLDIR	?= /opt/blocksds/core/tools/grit
 INSTALLDIR_ABS	:= $(abspath $(INSTALLDIR))

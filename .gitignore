@@ -1,2 +1,5 @@
-build
+build/
+lib/
+docs/
+warn.log
 grit
