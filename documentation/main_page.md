@@ -60,7 +60,7 @@ Graphics type:
 - `-gb`: Bitmapped graphics output. NOTE: without an `-gT` option, this data
   will have a clear bit 15.
 - `-gt`: Tiled graphics output (default).
-- -`gx`: Enable texture mode. You must also use `-gb`.
+- `-gx`: Enable texture mode. You must also use `-gb`.
 
 Format of the output:
 
