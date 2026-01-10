@@ -44,7 +44,7 @@ www.devkitpro.org) have also been helpful in making this a multi-platform tool.
 
 Contact email: cearn at coranac dot com
 
-Please, report issues [here](https://github.com/blocksds/sdk/issues).
+Please, report issues [here](https://codeberg.org/blocksds/sdk/issues).
 
 ## 2. List of options
 
