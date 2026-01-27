@@ -136,9 +136,11 @@ struct GrfHeader
 	};
 	u8		tileWidth, tileHeight;
 	u8		metaWidth, metaHeight;
-	u16		unused;
+	u16		flags;
 	ule32	gfxWidth, gfxHeight;
 };
+
+#define GRF_FLAGS_COLOR0_TRANSPARENT (1 << 0)
 
 chunk_t *chunk_create(const char *id, const RECORD *rec);
 chunk_t *chunk_create(const char *id, const void *data, uint size);
@@ -922,6 +924,8 @@ void chunk_free(chunk_t *chunk)
 chunk_t *grit_prep_grf(GritRec *gr)
 {
 	GrfHeader hdr;
+	memset(&hdr, 0, sizeof(hdr));
+
 	chunk_t *cklist[5]=  { NULL };
 
 	// Semi-constant data.
@@ -946,6 +950,23 @@ chunk_t *grit_prep_grf(GritRec *gr)
 			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_A3I5;
 		else if(gr->gfxTexMode == GRIT_TEXFMT_4x4)
 			bpps[GRIT_ITEM_GFX]= GRF_TEXFMT_4x4;
+
+		// Textures let the developer decide if color 0 is transparent or not
+		// (2D sprites and backgrounds always force color 0 to be transparent).
+		// If grit has been started with a transparent color specified with
+		// "-gT" we need to save in the GRF file that color 0 is transparent.
+
+		// Don't check gr->gfxHasAlpha, it only specifies if the graphics
+		// themselves have an alpha channel (like in RGBA 16 bit mode).
+		if(gr->palHasAlpha)
+		{
+			lprintf(LOG_STATUS, "  Palette color 0 is transparent.\n");
+			hdr.flags = GRF_FLAGS_COLOR0_TRANSPARENT;
+		}
+		else
+		{
+			lprintf(LOG_STATUS, "  Palette color 0 is opaque.\n");
+		}
 	}
 
 	// Determine background type
@@ -967,8 +988,6 @@ chunk_t *grit_prep_grf(GritRec *gr)
 	bpps[GRIT_ITEM_MAP]= bgfmt;
 
 	// Prepare GRF file header
-
-	memset(&hdr, 0, sizeof(hdr));
 
 	//# PONDER: what should the sizes represent?
 	hdr.gfxWidth= gr->areaRight - gr->areaLeft;			
