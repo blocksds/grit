@@ -976,13 +976,23 @@ chunk_t *grit_prep_grf(GritRec *gr)
 	if (gr->mapProcMode != GRIT_EXCLUDE)
 	{
 		if (gr->mapLayout == GRIT_MAP_FLAT) // -mLf
-			bgfmt = GRF_BGFMT_REG_16x16;
+		{
+			if (gr->gfxBpp == 4)
+				bgfmt = GRF_BGFMT_FLAT_4BPP;
+			else if (gr->gfxBpp == 8)
+				bgfmt = GRF_BGFMT_FLAT_8BPP;
+		}
 		else if (gr->mapLayout == GRIT_MAP_REG) // -mLs
-			bgfmt = GRF_BGFMT_REG_256x1;
+		{
+			if (gr->gfxBpp == 4)
+				bgfmt = GRF_BGFMT_SBB_4BPP;
+			else if (gr->gfxBpp == 8)
+				bgfmt = GRF_BGFMT_SBB_8BPP;
+		}
 		else if (gr->mapLayout == GRIT_MAP_AFFINE) // -mLa
-			bgfmt = GRF_BGFMT_AFF_256x1;
-
-		// TODO: GRF_BGFMT_AFF_EXT_256x16
+		{
+			bgfmt = GRF_BGFMT_AFF_8BPP;
+		}
 	}
 
 	bpps[GRIT_ITEM_MAP]= bgfmt;
