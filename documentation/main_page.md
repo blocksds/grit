@@ -36,13 +36,12 @@ palettes of 16 colors each. If you want to export a 256 color bitmap, ensure
 that your bitmap doesn't use more than 256 colors (or 255 if you want color 0 to
 be transparent!).
 
-The original author of Grit is Jasper Vijn (Cearn). For the basic CLI
-functionality I am indebted to gauauu (www.tolberts.net), who basically handed
-me a set of CLI functions, which proved a _lot_ easier to use than what I had
-initially planned on using. Several others (in particular, Dave Murphy,
-www.devkitpro.org) have also been helpful in making this a multi-platform tool.
-
-Contact email: cearn at coranac dot com
+The original author of Grit is Jasper Vijn (Cearn, cearn at coranac dot com).
+For the basic CLI functionality I am indebted to gauauu (www.tolberts.net), who
+basically handed me a set of CLI functions, which proved a _lot_ easier to use
+than what I had initially planned on using. Several others (in particular, [Dave
+Murphy](www.devkitpro.org) has also been helpful in making this a multi-platform
+tool.
 
 Please, report issues [here](https://codeberg.org/blocksds/sdk/issues).
 
@@ -520,16 +519,25 @@ tilemap.s : $(PNGS)
 
 ### 5.1. GRF files
 
-I made myself a [RIFF](http://en.wikipedia.org/wiki/RIFF_(File_format)) binary
-format because a) different loose binaries are somewhat annoying and b) they
-lose all context. A RIFF chunk looks like this:
+GRF is a [RIFF](http://en.wikipedia.org/wiki/RIFF_(File_format)) binary
+format that can hold multiple chunks of graphics data in a single file. It's
+useful because:
+
+- You don't have to keep different binaries for the same graphics element (for
+  example, a tiled map has a palette, a tile set and a tile map).
+- Loose binary files don't have information such as the format of the graphics
+  or its dimensions.
+
+A RIFF chunk looks like this:
 
 ```c
-struct chunk_t {
+typedef struct
+{
     char id[4];
     u32  size;
-    u8   data[1];
-};
+    u8   data[];
+}
+chunk_t;
 ```
 
 A 4-byte identifier, a 4-byte size field, indicating the size of the data (_not_
@@ -540,7 +548,7 @@ the size of the whole chunk!) and a variable-length data array. A `GRF` chunk
 "RIFF" # {
     "GRF " # {
         "HDRX" # { header info }
-        "HDR " # { deprecated header info }
+        "HDR " # { deprecated header info (use HDRX instead) }
         "GFX " # { gfx data }
         "MAP " # { map data }
         "MTIL" # { metatile data }
@@ -566,23 +574,52 @@ typedef struct
     uint16_t palAttr;  ///< Number of colors of the palette. 0 if not present.
     uint8_t  tileWidth, tileHeight; ///< Size of tiles in pixels
     uint8_t  metaWidth, metaHeight; ///< Size of metamap in tiles
-    uint16_t unused; ///< Currently unused
+    uint16_t flags;                 ///< File settings. Check GRFFlags.
     uint32_t gfxWidth, gfxHeight;   ///< Size of graphics in pixels
-} GRFHeader;
+}
+GRFHeader;
 ```
 
-The attributes here are just the bitdepths for now, or 0 if the the item isn't
-exported, but this behaviour may change later. The tileWidth and tileHeight are
-the tile dimensions in pixels, and metaWidth/Height are the metatile dimensions
-in **tile**-units.
+The flags that can be set in the GRF header are:
 
-GrfHeader is unfinished
+```c
+typedef enum
+{
+    GRF_FLAG_COLOR0_TRANSPARENT = 1 << 0, ///< Color 0 is transparent (for textures)
+}
+GRFFlags;
+```
 
-I'm still considering what should go into the header here; things like
-map/metamap sizes may be useful, as would offsets, formats and other niceties.
-These may be added at a later date.
+Special values for the GFX attribute field for NDS textures:
 
-The following is a simple reader for GRF-formatted data.
+```c
+typedef enum
+{
+    GRF_TEXFMT_A5I3 = 128,
+    GRF_TEXFMT_A3I5 = 129,
+    GRF_TEXFMT_4x4  = 130,
+}
+GRFTextureTypes;
+```
+
+The MAP attribute field defines the background type. It specifies the bit depth
+and the tile layout. SBB means that the map is laid out as 32x32 tile blocks,
+flat means that the map is laid out as simple rows:
+
+```c
+typedef enum
+{
+    GRF_BGFMT_NO_DATA       = 0, ///< No map data present
+    GRF_BGFMT_SBB_4BPP      = 1, ///< SBB layout, 16-bit entries, 16-color palettes
+    GRF_BGFMT_SBB_8BPP      = 2, ///< SBB layout, 16-bit entries, 256-color palettes
+    GRF_BGFMT_AFF_8BPP      = 3, ///< Affine layout, 8-bit entries, 256-color palette
+    GRF_BGFMT_FLAT_8BPP     = 4, ///< Flat layout, 16-bit entries, 256-color palettes
+    GRF_BGFMT_FLAT_4BPP     = 5, ///< Flat layout, 16-bit entries, 16-color palettes
+}
+GRFMapType;
+```
+
+The following is a simple reader for GRF-formatted data:
 
 ```c
 #define CHUNK_ID(a,b,c,d)   ((u32)((a) | (b) << 8 | (c) << 16 | (d) << 24))
@@ -601,7 +638,7 @@ bool grf_decomp(const void *src, void *dst)
     switch (header & 0xF0)
     {
         case 0x00: // No compression
-            tonccpy(dst, (u8*)src + 4, size);
+            memcpy(dst, (u8 *)src + 4, size);
             return true;
         case 0x10: // LZ77
             LZ77UnCompVram(src, dst);
@@ -617,35 +654,35 @@ bool grf_decomp(const void *src, void *dst)
     }
 }
 
-//! Load grf data
+// Load GRF data
 bool grf_load(const void *src, void *gfxDst, void *mapDst, void *palDst)
 {
-    u32 *src32 = (u32*)src;
+    u32 *src32 = (u32 *)src;
 
     // Must start with "RIFF" - "GRF "
     if ((src == NULL) || (src32[0] != ID_RIFF) || (src32[2] != ID_GRF))
         return false;
 
-    u32 sizeMax = src32[1] - 4; // GRF size
-    src32 += 3;                 // Skip GRF ID and size
+    size_t sizeMax = src32[1] - 4; // GRF size
+    src32 += 3;                    // Skip GRF ID and size
 
-    for(u32 i=0; i<sizeMax; i += size+8)
+    for (size_t i = 0; i < sizeMax; i += size + 8)
     {
         u32 id = src32[0];
-        u32 size = src32[1];
+        size_t size = src32[1];
 
         switch (id)
         {
             case CHUNK_ID('G', 'F', 'X', ' '):
-                grf_decomp(&src32\[2\], gfxDst);
+                grf_decomp(&src32[2], gfxDst);
                 break;
 
             case CHUNK_ID('M', 'A', 'P', ' '):
-                grf_decomp(&src32\[2\], mapDst);
+                grf_decomp(&src32[2], mapDst);
                 break;
 
             case CHUNK_ID('P', 'A', 'L', ' '):
-                grf_decomp(&src32\[2\], palDst);
+                grf_decomp(&src32[2], palDst);
                 break;
         }
         src32 += (size + 8) / 4;
@@ -656,18 +693,17 @@ bool grf_load(const void *src, void *gfxDst, void *mapDst, void *palDst)
 ```
 
 Note that the header and metamap chunks are ignored here for simplicity's sake.
-Also note the decompression routine. I've made it a requirement that each item
-**must** have a header word compatible with the BIOS functions, even if there is
-no actual compression (hence the difference between `-Z0` vs `-Z!`). That way
-you can get the compression-type from the data itself, even if there's no actual
+You can see a full GRF file reader
+[here](https://codeberg.org/blocksds/libnds/src/branch/master/source/arm9/grf.c)
+and
+[here](https://codeberg.org/blocksds/libnds/src/branch/master/include/nds/arm9/grf.h).
+
+Also note the decompression routine. There's a requirement for each itme to have
+a header word compatible with the BIOS functions, even if there is no actual
+compression (hence the difference between `-Z0` vs `-Z!`). That way you can get
+the compression-type from the data itself, even if there's no actual
 compression. Another requirement is that each chunk must be word-aligned. This
 is actually part of the RIFF-spec itself.
-
-There is a reference to `tonccpy()` in `grf_decomp()`. This is a `memcpy()`
-replacement that also works properly for GBA-VRAM. You can get it from
-[coranac:tonccpy](http://www.coranac.com/2008/01/25/tonccpy/), or you can just
-replace the call with `memcpy()` or any other copy routine if you're sure you
-won't run into trouble with those.
 
 You can export to GRF using `-ftr`. You can also get GRF arrays by using `-fr`,
 but that presently only works for C and asm data. The extension used for the
@@ -690,9 +726,9 @@ As of v0.8 this is now different. If …
 appropriate) from the individual parts and only export the completed sets at the
 end. The name of the shared data can be controlled with `-S` and that of the
 shared output file with `-O` (uppercase for shared, versus lowercase for
-individual). If you don't add these names, they will be taken from the lowercase
-versions; if those are absent too, the name of the first source file will be
-used as a basis.
+individual). You can also specify the output directory of shared data with `-D`.
+If you don't add these names, they will be taken from the lowercase versions; if
+those are absent too, the name of the first source file will be used as a basis.
 
 ### 5.3. Todo list
 
@@ -701,7 +737,6 @@ flesh it out, that'd be great.
 
 - The way the tile-file is handled now is kinda screwed up. Needs to be
   straightened out.
-- PCX support for external tileset. FreeImage doesn't allow PCX writing.
 - Better batch-run options. Possibly including the ability to clump the data
   together somehow in a matrix.
 - Grouped data. For example, if you have a bitmap with several sprite animation
