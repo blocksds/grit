@@ -97,7 +97,7 @@ endif
 # -------------------------
 
 WARNFLAGS_C	:= -Wall \
-		   -Wno-maybe-uninitialized -Wno-dangling-else -Wno-parentheses
+		   -Wno-maybe-uninitialized -Wno-parentheses
 
 # As of GCC 14, implicit function declarations are considered errors.
 # However, libplum in some cases tries to call the C11 standard function
