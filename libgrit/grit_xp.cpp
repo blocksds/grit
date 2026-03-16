@@ -197,7 +197,12 @@ static FILE* open_tmp_file(char* pathbuf, size_t pathbuf_sz,
         return NULL;
     }
 #else
-	snprintf(pathbuf, pathbuf_sz, "%s.tmp.XXXXXX", base_name);
+	const char *format = ".tmp.XXXXXX";
+
+	if (pathbuf_sz < (strlen(base_name) + strlen(format) + 1))
+		return NULL;
+
+	snprintf(pathbuf, pathbuf_sz, "%s%s", format, base_name);
 	int fd = mkstemp(pathbuf);
 	if (fd == -1) {
 		return NULL;
