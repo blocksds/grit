@@ -107,7 +107,7 @@ WARNFLAGS_C	:= -Wall \
 WARNFLAGS_C	+= -Wno-implicit-function-declaration
 
 WARNFLAGS_CXX	:= -Wall -Wextra -Wno-unused-result -Wno-sign-compare \
-		   -Wno-format-truncation -Wno-class-memaccess
+		   -Wno-format-truncation
 
 ifeq ($(SOURCES_CPP),)
     HOSTLD	:= $(HOSTCC)

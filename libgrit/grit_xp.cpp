@@ -923,8 +923,7 @@ void chunk_free(chunk_t *chunk)
 
 chunk_t *grit_prep_grf(GritRec *gr)
 {
-	GrfHeader hdr;
-	memset(&hdr, 0, sizeof(hdr));
+	GrfHeader hdr = {};
 
 	chunk_t *cklist[5]=  { NULL };
 
