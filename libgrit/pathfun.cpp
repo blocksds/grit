@@ -889,7 +889,11 @@ bool im_data_gas(FILE* fp, const char* name, const void *_data, int *len, int *c
         }
         int c = 0;
         sscanf(tread, search, &c);
-        if(c<strlen(search)-2) { done = 1; break; }
+        if (c < (int)strlen(search)-2)
+        {
+            done = 1;
+            break;
+        }
         tread += c;
 
         int _col = cols;

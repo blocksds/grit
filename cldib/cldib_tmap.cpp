@@ -242,7 +242,7 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 				me= dib_find(tmpDib, rdx, rdxN, flags);
 
 				// Not found? Add to tileset
-				if(me.index() >= rdxN)
+				if(me.index() >= (int)rdxN)
 				{
 					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 						dib_get_size_img(tmpDib));
@@ -268,7 +268,7 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 			me= dib_find(tmpDib, rdx, rdxN, flags);
 
 			// Not found? Add to tileset
-				if(me.index() >= rdxN)
+				if(me.index() >= (int)rdxN)
 			{
 				memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 					dib_get_size_img(tmpDib));
@@ -609,7 +609,7 @@ bool dib_tilecmp(CLDIB *dib, CLDIB *tileset, int tid, u32 dwMask)
 */
 Mapsel dib_find(CLDIB *dib, CLDIB *tileset, u32 tileN, u32 flags)
 {
-	int i;
+	size_t i;
 	int dibB= dib_get_bpp(dib);
 	u32 mask;
 	Mapsel me= { tileN };

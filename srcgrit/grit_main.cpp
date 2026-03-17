@@ -249,7 +249,7 @@ bool grit_parse_mapsel_format(const char *key, MapselFormat *pmf)
 	mf.vfShift= pos - mf.vfLen - mf.vfShift;
 
 	// --- Fix mapsel size ---
-	if(nBits < pos || nBits > sizeof(long))
+	if(nBits < pos || nBits > (int)sizeof(long))
 		nBits= pos;
 	if(nBits < 8)
 		mf.bitDepth= ceilpo2(nBits);
@@ -462,7 +462,6 @@ bool grit_parse_map(GritRec *gr, const strvec &args)
 */
 bool grit_parse_file(GritRec *gr, const strvec &args)
 {
-	int ii;
 	char *pstr;
 	char *pext, str[MAXPATHLEN];
 
@@ -513,7 +512,7 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		pext= path_get_ext(pstr);
 		if( !CLI_BOOL("-ft") && !isempty(pext) )
 		{
-			for(ii=0; ii<countof(c_fileTypes); ii++)
+			for(size_t ii=0; ii<countof(c_fileTypes); ii++)
 			{
 				if(strcasecmp(pext, c_fileTypes[ii]) == 0)
 				{
