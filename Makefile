@@ -96,16 +96,9 @@ endif
 # Compiler and linker flags
 # -------------------------
 
-WARNFLAGS_C	:= -Wall \
-		   -Wno-maybe-uninitialized -Wno-parentheses
+WARNFLAGS_C	:= -Wall -Wextra -Wpedantic -Wstrict-prototypes
 
-# As of GCC 14, implicit function declarations are considered errors.
-# However, libplum in some cases tries to call the C11 standard function
-# aligned_alloc, which is not provided on MinGW nor is it necessary there.
-# This is a workaround which demotes the relevant error back to a warning.
-# If it ever becomes necessary, the linking will fail regardless.
-WARNFLAGS_C	+= -Wno-implicit-function-declaration
-
+# TODO: Fix the disabled warnings
 WARNFLAGS_CXX	:= -Wall -Wextra -Wno-unused-result
 
 ifeq ($(SOURCES_CPP),)

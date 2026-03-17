@@ -1,3 +1,22 @@
+// ===== Start of BlocksDS modifications =====
+
+#pragma GCC diagnostic ignored "-Wclobbered"
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wtype-limits"
+
+// As of GCC 14, implicit function declarations are considered errors.
+// However, libplum in some cases tries to call the C11 standard function
+// aligned_alloc, which is not provided on MinGW nor is it necessary there.
+// This is a workaround which demotes the relevant error back to a warning.
+// If it ever becomes necessary, the linking will fail regardless.
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+
+// ===== End of BlocksDS modifications =====
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
