@@ -30,13 +30,6 @@
 	good time to go for strings iso char*s as well?
 */
 
-// PONDER, are these really necessary?
-#ifndef _MSC_VER
-//#include <sys/param.h>
-//#include <unistd.h>
-//#include <strings.h>
-#endif	// _MSC_VER
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
