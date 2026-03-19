@@ -520,9 +520,13 @@ long file_size(const char *fpath)
 	if(fp == NULL)
 		return 0;
 
-	fseek(fp, 0, SEEK_END);
-	
+	if (fseek(fp, 0, SEEK_END) < 0)
+		return 0;
+
 	long pos= ftell(fp);
+	if (pos < 0)
+		return 0;
+
 	fclose(fp);
 
 	return pos;
@@ -534,9 +538,18 @@ long file_size(FILE *fp)
 		return 0;
 
 	long tmp= ftell(fp);
-	fseek(fp, 0, SEEK_END);
+	if (tmp < 0)
+		return 0;
+
+	if (fseek(fp, 0, SEEK_END) < 0)
+		return 0;
+
 	long pos= ftell(fp);
-	fseek(fp, tmp, SEEK_SET);
+	if (pos < 0)
+		return 0;
+
+	if (fseek(fp, tmp, SEEK_SET) < 0)
+		return 0;
 
 	return pos;
 }
