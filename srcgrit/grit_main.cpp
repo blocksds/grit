@@ -914,7 +914,9 @@ void args_gather(strvec &args, int argc, char **argv)
 
 	while( !feof(fp) )
 	{
-			fgets(str, MAXPATHLEN, fp);
+		if (fgets(str, MAXPATHLEN, fp) == NULL)
+			continue;
+
 		// Find comment and end string there
 		pstr= strchr(str, '#');
 		if( pstr )

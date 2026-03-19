@@ -607,7 +607,9 @@ long file_find_tag(FILE *fout, FILE *fin, const char *tag)
 		while(!feof(fin))
 		{
 			pos= ftell(fin);
-			fgets(buffy, LINE_MAX, fin);
+			if (fgets(buffy, LINE_MAX, fin) == NULL)
+				continue;
+
 			strtrim(line, buffy);
 			if(strncmp(line, tag, strlen(tag)) == 0)
 				return pos;	
@@ -618,20 +620,26 @@ long file_find_tag(FILE *fout, FILE *fin, const char *tag)
 		// NOTE: fgets() fails if EOF is at the start of a line; it
 		//   won't even put '\0' in the string. So I'm doing that
 		//   myself.
-		fgets(buffy, LINE_MAX, fin);
-		while(!feof(fin))
+		if (fgets(buffy, LINE_MAX, fin) != NULL)
 		{
-			pos= ftell(fin);
-			strtrim(line, buffy);
-			if(strcmp(line, tag) == 0)
-				return pos;
+			while(!feof(fin))
+			{
+				pos= ftell(fin);
+				strtrim(line, buffy);
+				if(strcmp(line, tag) == 0)
+					return pos;
 
-			fputs(buffy, fout);
-			buffy[0]= '\0';
-			fgets(buffy, LINE_MAX, fin);
+				fputs(buffy, fout);
+				buffy[0]= '\0';
+				if (fgets(buffy, LINE_MAX, fin) == NULL)
+					continue;
+			}
 		}
 		if(buffy[0] != '\0')
-		{	fputs(buffy, fout);	fputs("\n", fout);	}
+		{
+			fputs(buffy, fout);
+			fputs("\n", fout);
+		}
 	}
 	return -1;
 }
@@ -848,7 +856,10 @@ bool im_data_gas(FILE* fp, const char* name, const void *_data, int *len, int *c
             if(!strcmp(read, name)) retval = true; // found the block
         }
         else
-            fgets(read, 256, fp);
+        {
+            if (fgets(read, 256, fp) == NULL)
+                continue;
+        }
     }
 
     sprintf(search, "%s%s", name, "Pal");
