@@ -479,7 +479,6 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 	case 'g':	gr->fileType= GRIT_FTYPE_GBFS;	break;
 	case 'c':	gr->fileType= GRIT_FTYPE_C;		break;
 	case 'r':	gr->fileType= GRIT_FTYPE_GRF;	break;
-	//case 'o':	gr->fileType= GRIT_FTYPE_O;		break;
 	case 's':
 	default:	gr->fileType= GRIT_FTYPE_S;	
 	}

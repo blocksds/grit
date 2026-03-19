@@ -148,7 +148,6 @@ enum EGritFileType
 	GRIT_FTYPE_GBFS	= 3,	//<! Output in GBFS archive `-ftg'
 	GRIT_FTYPE_GRF	= 4,	//!< Output in RIFF format (chunked) `-ftr'
 	GRIT_FTYPE_MAX
-//	GRIT_FTYPE_O	= 5,
 };
 
 //! Shared grit flags.

@@ -162,13 +162,6 @@ bool grit_xp_bin(GritRec *gr);
 bool grit_xp_gbfs(GritRec *gr);
 bool grit_xp_grf(GritRec *gr);
 
-
-// ELF export
-//bool grit_xp_o(GritRec *gr);
-//bool xp_array_o(FILE *fp, const char *varname, 
-//	const BYTE *data, int len, int chunk);
-//bool xp_data_o(FILE *fp, const BYTE *data, int len, int chunk);
-
 // misc
 void grit_xp_decl(FILE *fp, const DataItem *item);
 void grit_xp_decl(FILE *fp, int chunk, const char *name, int affix, int len);
@@ -247,8 +240,6 @@ bool grit_export(GritRec *gr)
 	case GRIT_FTYPE_GRF:
 		grit_xp_grf(gr);	break;
 
-	//case GRIT_FTYPE_O:
-	//	grit_xp_o(gr);	break;
 	default:
 		return false;
 	}
@@ -1177,29 +1168,6 @@ bool grit_xp_grf(GritRec *gr)
 
 	return true;
 }
-
-
-// --------------------------------------------------------------------
-// EXPORT TO ELF
-// --------------------------------------------------------------------
-
-
-//! Export to GNU object file
-/*!
-	\note Non-functional. For future use.
-*/
-bool grit_xp_o(GritRec *gr)
-{
-	(void)gr;
-	return true;
-}
-
-
-//! Export a single array to GNU object file (for future use)
-bool xp_array_o(FILE *fp, const char *varname, 
-	const BYTE *data, int len, int chunk);
-
-
 
 // ====================================================================
 // === HELPERS ========================================================
