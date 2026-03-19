@@ -348,11 +348,11 @@ bool grit_prep_item(GritRec *gr, eint id, DataItem *item)
 //! Export to C source file.
 bool grit_xp_c(GritRec *gr)
 {
-	char str[MAXPATHLEN];
 	char tag[MAXPATHLEN], fpath[MAXPATHLEN], tmppath[MAXPATHLEN];
-	long pos= -1;
-	FILE *fin, *fout;
-	bool bAppend= gr->bAppend;
+	long pos = -1;
+	FILE *fin = NULL;
+	FILE *fout = NULL;
+	bool bAppend = gr->bAppend;
 
 	// Prep begin tag
 	sprintf(tag, "//{{BLOCK(%s)",gr->symName);
@@ -360,7 +360,7 @@ bool grit_xp_c(GritRec *gr)
 	// Open 'output' file
 	strcpy(fpath, gr->dstPath);
 
-	lprintf(LOG_STATUS, "Export to C: %s into %s .\n", gr->symName, fpath);		
+	lprintf(LOG_STATUS, "Export to C: %s into %s .\n", gr->symName, fpath);
 
 	// File doesn't exist -> write-mode only
 	if(!file_exists(fpath))
@@ -369,31 +369,60 @@ bool grit_xp_c(GritRec *gr)
 	if(bAppend)
 	{
 		// Open temp and input file
-		if((fout = open_tmp_file(tmppath, sizeof(tmppath), fpath)) == NULL)
+		fout = open_tmp_file(tmppath, sizeof(tmppath), fpath);
+		if (fout == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open temp file '%s' to extend '%s'.", tmppath, fpath);
 			return false;
+		}
 
 		fin= fopen(fpath, "r");
+		if (fin == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open file '%s' to append data.", fpath);
+			goto error;
+		}
+
 		pos= file_find_tag(fout, fin, tag);
 	}
 	else
-		fout= fopen(fpath, "w");
+	{
+		fout = fopen(fpath, "w");
+		if (fout == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open output file '%s'.", fpath);
+			return false;
+		}
+	}
 
 	// Add blank line before new block
 	if(pos == -1)
-		fputc('\n', fout);
+	{
+		if (fputc('\n', fout) == EOF)
+		{
+			lprintf(LOG_ERROR, "Failed to write to file '%s'", fpath);
+			goto error;
+		}
+	}
 
 	// --- Start grit-block ---
 
-	fprintf(fout, "%s\n\n", tag);
+	if (fprintf(fout, "%s\n\n", tag) < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to write to file '%s'.", fpath);
+		goto error;
+	}
 
 	grit_preface(gr, fout, "//");
 
 	if(gr->bRiff)	// Single GRF item
 	{
+		char str[MAXPATHLEN];
+
 		chunk_t *chunk= grit_prep_grf(gr);
 		strcat(strcpy(str, gr->symName), "Grf");
 
-		xp_array_c(fout, str, chunk, chunk->size+8, 
+		xp_array_c(fout, str, chunk, chunk->size+8,
 			grit_type_size(gr->gfxDataType));
 
 		chunk_free(chunk);
@@ -405,13 +434,17 @@ bool grit_xp_c(GritRec *gr)
 		{
 			grit_prep_item(gr, id, &item);
 			if(item.procMode == GRIT_EXPORT)
-				xp_array_c(fout, item.name, item.pRec->data, 
-					rec_size(item.pRec), grit_type_size(item.dataType));					
+				xp_array_c(fout, item.name, item.pRec->data,
+					rec_size(item.pRec), grit_type_size(item.dataType));
 		}
 	}
 
 	sprintf(tag, "//}}BLOCK(%s)",gr->symName);
-	fprintf(fout, "%s\n", tag);
+	if (fprintf(fout, "%s\n", tag) < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to write to file '%s'.", fpath);
+		goto error;
+	}
 
 	// --- End grit-block ---
 
@@ -423,15 +456,34 @@ bool grit_xp_c(GritRec *gr)
 
 		// close files and rename
 		fclose(fin);
+		fin = NULL;
+
 		if (rename(tmppath, fpath) < 0)
 		{
 			// in case rename fails, copy over the source file instead
 			fin= fopen(fpath, "w");
-			fseek(fout, 0, SEEK_SET);
+			if (fin == NULL)
+			{
+				lprintf(LOG_ERROR, "Failed to read '%s' to copy it.", fpath);
+				goto error;
+			}
+
+			if (fseek(fout, 0, SEEK_SET) < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to rewind output file.");
+				goto error;
+			}
+
 			file_copy(fin, fout, -1);
+
 			fclose(fin);
 			fclose(fout);
-			remove(tmppath);
+
+			if (remove(tmppath) < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to remove temporary file '%s'.", tmppath);
+				goto error;
+			}
 		}
 		else
 		{
@@ -444,6 +496,14 @@ bool grit_xp_c(GritRec *gr)
 	}
 
 	return true;
+
+error:
+	if (fout)
+		fclose(fout);
+	if (fin)
+		fclose(fin);
+
+	return false;
 }
 
 
@@ -457,11 +517,11 @@ bool grit_xp_c(GritRec *gr)
 // later.
 bool grit_xp_gas(GritRec *gr)
 {
-	char str[MAXPATHLEN];
 	char tag[MAXPATHLEN], fpath[MAXPATHLEN], tmppath[MAXPATHLEN];
-	long pos= -1;
-	FILE *fin, *fout;
-	bool bAppend= gr->bAppend;
+	long pos = -1;
+	FILE *fin = NULL;
+	FILE *fout = NULL;
+	bool bAppend = gr->bAppend;
 
 	// Prep begin tag
 	sprintf(tag, "@{{BLOCK(%s)",gr->symName);
@@ -473,33 +533,61 @@ bool grit_xp_gas(GritRec *gr)
 
 	// File doesn't exist -> write-mode only
 	if(!file_exists(fpath))
-		bAppend=false;
+		bAppend= false;
 
 	if(bAppend)
 	{
 		// Open temp and input file
-		if((fout = open_tmp_file(tmppath, sizeof(tmppath), fpath)) == NULL)
+		fout = open_tmp_file(tmppath, sizeof(tmppath), fpath);
+		if (fout == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open temp file '%s' to extend '%s'.", tmppath, fpath);
 			return false;
+		}
 
 		fin= fopen(fpath, "r");
+		if (fin == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open file '%s' to append data.", fpath);
+			goto error;
+		}
+
 		pos= file_find_tag(fout, fin, tag);
 	}
 	else
-		fout= fopen(fpath, "w");
+	{
+		fout = fopen(fpath, "w");
+		if (fout == NULL)
+		{
+			lprintf(LOG_ERROR, "Can't open output file '%s'.", fpath);
+			return false;
+		}
+	}
 
 	// Add blank line before new block
 	if(pos == -1)
-		fputc('\n', fout);
+	{
+		if (fputc('\n', fout) == EOF)
+		{
+			lprintf(LOG_ERROR, "Failed to write to file '%s'", fpath);
+			goto error;
+		}
+	}
 
 	// --- Start grit-block ---
 
-	fprintf(fout, "%s\n\n", tag);
+	if (fprintf(fout, "%s\n\n", tag) < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to write to file '%s'.", fpath);
+		goto error;
+	}
 
 	grit_preface(gr, fout, "@");
 
-
 	if(gr->bRiff)	// Single GRF item
 	{
+		char str[MAXPATHLEN];
+
 		chunk_t *chunk= grit_prep_grf(gr);
 		strcat(strcpy(str, gr->symName), "Grf");
 
@@ -521,7 +609,11 @@ bool grit_xp_gas(GritRec *gr)
 	}
 
 	sprintf(tag, "@}}BLOCK(%s)",gr->symName);
-	fprintf(fout, "%s\n", tag);
+	if (fprintf(fout, "%s\n", tag) < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to write to file '%s'.", fpath);
+		goto error;
+	}
 
 	// --- End grit-block ---
 
@@ -533,15 +625,34 @@ bool grit_xp_gas(GritRec *gr)
 
 		// close files and rename
 		fclose(fin);
+		fin = NULL;
+
 		if (rename(tmppath, fpath) < 0)
 		{
 			// in case rename fails, copy over the source file instead
 			fin= fopen(fpath, "w");
-			fseek(fout, 0, SEEK_SET);
+			if (fin == NULL)
+			{
+				lprintf(LOG_ERROR, "Failed to read '%s' to copy it.", fpath);
+				goto error;
+			}
+
+			if (fseek(fout, 0, SEEK_SET) < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to rewind output file.");
+				goto error;
+			}
+
 			file_copy(fin, fout, -1);
+
 			fclose(fin);
 			fclose(fout);
-			remove(tmppath);
+
+			if (remove(tmppath) < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to remove temporary file '%s'.", tmppath);
+				goto error;
+			}
 		}
 		else
 		{
@@ -554,6 +665,14 @@ bool grit_xp_gas(GritRec *gr)
 	}
 
 	return true;
+
+error:
+	if (fout)
+		fclose(fout);
+	if (fin)
+		fclose(fin);
+
+	return false;
 }
 
 
