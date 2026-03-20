@@ -860,18 +860,18 @@ bool grit_xp_gbfs(GritRec *gr)
 			fpos= GBFL_SIZE + gb_count*GBEN_SIZE;
 			fseek(fout, fpos, SEEK_SET);
 
-			for(ii=0; ii<old_count; ii++)
+			for (size_t i = 0; i < old_count; i++)
 			{
-				fseek(fin, gbenD[ii].data_offset, SEEK_SET);
-				gbenD[ii].data_offset= fpos;
-				
-				jj= gbenD[ii].len >> 10;
-				while(jj--)
+				fseek(fin, gbenD[i].data_offset, SEEK_SET);
+				gbenD[i].data_offset= fpos;
+
+				jj= gbenD[i].len >> 10;
+				while (jj--)
 				{
 					fread(buf, 1024, 1, fin);
 					fwrite(buf, 1024, 1, fout);
 				}
-				if((jj= gbenD[ii].len & 1023) != 0)
+				if ((jj= gbenD[i].len & 1023) != 0)
 				{
 					fread(buf, jj, 1, fin);
 					fwrite(buf, jj, 1, fout);
