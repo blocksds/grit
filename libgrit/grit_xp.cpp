@@ -719,6 +719,7 @@ bool grit_xp_bin(GritRec *gr)
 */
 bool grit_xp_gbfs(GritRec *gr)
 {
+	FILE *fout = NULL;
 	int ii, jj;
 
 	// for new data
@@ -782,39 +783,63 @@ bool grit_xp_gbfs(GritRec *gr)
 		gr->symName, name);
 
 
-	FILE *fout= fopen("gbfs.tmp", "wb");
+	fout= fopen("gbfs.tmp", "wb");
 	if(fout == NULL)
+	{
+		lprintf(LOG_ERROR, "Failed to open temporary GBFS file.\n");
 		return false;
+	}
 
 	u32 fpos= GBFL_SIZE + gr_count*GBEN_SIZE;
-	fseek(fout, fpos, SEEK_SET);	// skip directory
+	if (fseek(fout, fpos, SEEK_SET) < 0) // skip directory
+	{
+		lprintf(LOG_ERROR, "Failed to seek position in GBFS file.\n");
+		goto error;
+	}
 
 	// Insert mode
 	// Replace old with same name; insert new
-	if(gr->bAppend)
+	if (gr->bAppend)
 	{
+		// If we fail to read at any point we simply ignore it
 		FILE *fin= fopen(name, "rb");
 		do
 		{
-			if(fin == NULL)
+			if (fin == NULL)
+			{
+				lprintf(LOG_WARNING, "Failed to open '%s'.\n", name);
 				break;
+			}
 
 			GBFS_FILE oldhdr;
 			// read and check file's header
-			if(fread(&oldhdr, GBFL_SIZE, 1, fin) < 1)
-			{	break;	}
-			if(memcmp(oldhdr.magic, GBFS_magic, 16))
+			if (fread(&oldhdr, GBFL_SIZE, 1, fin) < 1)
+			{
+				lprintf(LOG_WARNING, "Failed to read '%s'.\n", name);
 				break;
+			}
+			if (memcmp(oldhdr.magic, GBFS_magic, 16))
+			{
+				lprintf(LOG_WARNING, "This isn't a GBFS file: '%s'\n", name);
+				break;
+			}
 
 			// if we're here, we have a valid GBFS
 
-			int old_count= oldhdr.dir_nmemb;
+			size_t old_count= oldhdr.dir_nmemb;
 			gbenD= (GBFS_ENTRY*)malloc(old_count*GBEN_SIZE);
-			if(gbenD==NULL)
+			if (gbenD == NULL)
+			{
+				lprintf(LOG_WARNING, "Failed to allocate memory for '%s'.\n", name);
 				break;
+			}
 
 			// Read directory
-			fread(gbenD, GBEN_SIZE, old_count, fin);
+			if (fread(gbenD, GBEN_SIZE, old_count, fin) != old_count)
+			{
+				lprintf(LOG_WARNING, "Failed to read file entries for '%s'.\n", name);
+			}
+
 			// check for obsoletes
 			for(ii=0; ii<gr_count; ii++)
 			{
@@ -913,6 +938,12 @@ bool grit_xp_gbfs(GritRec *gr)
 	rename("gbfs.tmp", name);
 
 	return true;
+
+error:
+	if (fout)
+		fclose(fout);
+
+	return false;
 }
 
 // for qsort
