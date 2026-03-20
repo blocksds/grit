@@ -801,94 +801,95 @@ bool grit_xp_gbfs(GritRec *gr)
 	// Replace old with same name; insert new
 	if (gr->bAppend)
 	{
+		size_t old_count;
+
 		// If we fail to read at any point we simply ignore it
 		FILE *fin= fopen(name, "rb");
-		do
+		if (fin == NULL)
 		{
-			if (fin == NULL)
+			lprintf(LOG_WARNING, "Failed to open '%s'.\n", name);
+			goto append_error;
+		}
+
+		GBFS_FILE oldhdr;
+		// read and check file's header
+		if (fread(&oldhdr, GBFL_SIZE, 1, fin) < 1)
+		{
+			lprintf(LOG_WARNING, "Failed to read '%s'.\n", name);
+			goto append_error;
+		}
+		if (memcmp(oldhdr.magic, GBFS_magic, 16))
+		{
+			lprintf(LOG_WARNING, "This isn't a GBFS file: '%s'\n", name);
+			goto append_error;
+		}
+
+		// if we're here, we have a valid GBFS
+
+		old_count = oldhdr.dir_nmemb;
+		gbenD= (GBFS_ENTRY*)malloc(old_count*GBEN_SIZE);
+		if (gbenD == NULL)
+		{
+			lprintf(LOG_WARNING, "Failed to allocate memory for '%s'.\n", name);
+			goto append_error;
+		}
+
+		// Read directory
+		if (fread(gbenD, GBEN_SIZE, old_count, fin) != old_count)
+		{
+			lprintf(LOG_WARNING, "Failed to read file entries for '%s'.\n", name);
+		}
+
+		// check for obsoletes
+		for(ii=0; ii<gr_count; ii++)
+		{
+			gbenL= (GBFS_ENTRY*)bsearch(&gr_gben[ii], gbenD, 
+				old_count, GBEN_SIZE, gbfs_namecmp);
+			if(gbenL == NULL)
+				continue;
+			// Obsolete found; remove from list;
+			jj= (gbenL-gbenD);
+			old_count--;
+			memmove(gbenL, gbenL+1, (old_count-jj)*GBEN_SIZE);
+		}
+		// NOTE: old_count may have been modified
+		gb_count= gr_count+old_count;
+
+		// obsoletes are removed; write the rest to fout
+		BYTE buf[1024];
+		fpos= GBFL_SIZE + gb_count*GBEN_SIZE;
+		fseek(fout, fpos, SEEK_SET);
+
+		for (size_t i = 0; i < old_count; i++)
+		{
+			fseek(fin, gbenD[i].data_offset, SEEK_SET);
+			gbenD[i].data_offset= fpos;
+
+			jj= gbenD[i].len >> 10;
+			while (jj--)
 			{
-				lprintf(LOG_WARNING, "Failed to open '%s'.\n", name);
-				break;
+				fread(buf, 1024, 1, fin);
+				fwrite(buf, 1024, 1, fout);
+			}
+			if ((jj= gbenD[i].len & 1023) != 0)
+			{
+				fread(buf, jj, 1, fin);
+				fwrite(buf, jj, 1, fout);
 			}
 
-			GBFS_FILE oldhdr;
-			// read and check file's header
-			if (fread(&oldhdr, GBFL_SIZE, 1, fin) < 1)
-			{
-				lprintf(LOG_WARNING, "Failed to read '%s'.\n", name);
-				break;
-			}
-			if (memcmp(oldhdr.magic, GBFS_magic, 16))
-			{
-				lprintf(LOG_WARNING, "This isn't a GBFS file: '%s'\n", name);
-				break;
-			}
+			// pad to 16byte boundary
+			for(fpos=ftell(fout); fpos & 0x0F; fpos++)
+				fputc(0, fout);
+		}
 
-			// if we're here, we have a valid GBFS
+		// Combine lists
+		gbenL= (GBFS_ENTRY*)malloc(gb_count*GBEN_SIZE);
+		memcpy(gbenL, gr_gben, gr_count*GBEN_SIZE);
+		memcpy(&gbenL[gr_count], gbenD, old_count*GBEN_SIZE);
+		free(gbenD);
+		gbenD= gbenL;
 
-			size_t old_count= oldhdr.dir_nmemb;
-			gbenD= (GBFS_ENTRY*)malloc(old_count*GBEN_SIZE);
-			if (gbenD == NULL)
-			{
-				lprintf(LOG_WARNING, "Failed to allocate memory for '%s'.\n", name);
-				break;
-			}
-
-			// Read directory
-			if (fread(gbenD, GBEN_SIZE, old_count, fin) != old_count)
-			{
-				lprintf(LOG_WARNING, "Failed to read file entries for '%s'.\n", name);
-			}
-
-			// check for obsoletes
-			for(ii=0; ii<gr_count; ii++)
-			{
-				gbenL= (GBFS_ENTRY*)bsearch(&gr_gben[ii], gbenD, 
-					old_count, GBEN_SIZE, gbfs_namecmp);
-				if(gbenL == NULL)
-					continue;
-				// Obsolete found; remove from list;
-				jj= (gbenL-gbenD);
-				old_count--;
-				memmove(gbenL, gbenL+1, (old_count-jj)*GBEN_SIZE);
-			}
-			// NOTE: old_count may have been modified
-			gb_count= gr_count+old_count;
-
-			// obsoletes are removed; write the rest to fout
-			BYTE buf[1024];
-			fpos= GBFL_SIZE + gb_count*GBEN_SIZE;
-			fseek(fout, fpos, SEEK_SET);
-
-			for (size_t i = 0; i < old_count; i++)
-			{
-				fseek(fin, gbenD[i].data_offset, SEEK_SET);
-				gbenD[i].data_offset= fpos;
-
-				jj= gbenD[i].len >> 10;
-				while (jj--)
-				{
-					fread(buf, 1024, 1, fin);
-					fwrite(buf, 1024, 1, fout);
-				}
-				if ((jj= gbenD[i].len & 1023) != 0)
-				{
-					fread(buf, jj, 1, fin);
-					fwrite(buf, jj, 1, fout);
-				}
-
-				// pad to 16byte boundary
-				for(fpos=ftell(fout); fpos & 0x0F; fpos++)
-					fputc(0, fout);
-			}
-
-			// Combine lists
-			gbenL= (GBFS_ENTRY*)malloc(gb_count*GBEN_SIZE);
-			memcpy(gbenL, gr_gben, gr_count*GBEN_SIZE);
-			memcpy(&gbenL[gr_count], gbenD, old_count*GBEN_SIZE);
-			free(gbenD);
-			gbenD= gbenL;
-		} while(0);
+append_error:
 
 		if(fin)
 			fclose(fin);
