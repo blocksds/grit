@@ -1085,6 +1085,11 @@ chunk_t *chunk_create(const char *id, const void *data, uint size)
 
 	size= ALIGN4(size);
 	chunk_t *chunk= (chunk_t*)malloc(size+8);
+	if (chunk == NULL)
+	{
+		lprintf(LOG_ERROR, "%s: Failed to allocate memory\n", __func__);
+		exit(EXIT_FAILURE);
+	}
 
 	for(ii=0; ii<4; ii++)
 		chunk->id[ii]= id[ii];
@@ -1116,14 +1121,22 @@ chunk_t *chunk_merge(const char *id, chunk_t *cklist[], uint count, const char *
 	uint size= 0;
 
 	for(ii=0; ii<count; ii++)
+	{
 		if(cklist[ii] != NULL)
 			size += align(cklist[ii]->size,4)+8;
+	}
 
 	chunk_t *chunk;
 	u8 *dst;
 
 	// Make room for groupsID + total_size + ID + data
 	chunk= (chunk_t*)malloc(size+12+4);
+	if (chunk == NULL)
+	{
+		lprintf(LOG_ERROR, "%s: Failed to allocate memory\n", __func__);
+		exit(EXIT_FAILURE);
+	}
+
 	chunk_t *sub= (chunk_t*)chunk->data;
 	for(ii=0; ii<4; ii++)
 		chunk->id[ii]= groupID[ii];
@@ -1268,16 +1281,28 @@ chunk_t *grit_prep_grf(GritRec *gr)
 	\note	No append mode just yet.
 */
 bool grit_xp_grf(GritRec *gr)
-{	
-	lprintf(LOG_STATUS, "Export to GRF: %s into %s .\n", 
+{
+	lprintf(LOG_STATUS, "Export to GRF: %s into %s .\n",
 		gr->symName, gr->dstPath);
 	if(gr->bAppend)
 		lprintf(LOG_WARNING, "  No append mode for GRF yet.\n");
 
 	FILE *fout= fopen(gr->dstPath, "wb");
+	if (fout == NULL)
+	{
+		lprintf(LOG_ERROR, "Failed to open '%s'\n", gr->dstPath);
+		return false;
+	}
 
 	chunk_t *chunk= grit_prep_grf(gr);
-	fwrite(chunk, 1, chunk->size+8, fout);
+
+	if (fwrite(chunk, 1, chunk->size+8, fout) != (chunk->size+8))
+	{
+		lprintf(LOG_ERROR, "Failed to write '%s'\n", gr->dstPath);
+		fclose(fout);
+		return false;
+	}
+
 	chunk_free(chunk);
 
 	fclose(fout);
