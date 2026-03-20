@@ -720,7 +720,6 @@ bool grit_xp_bin(GritRec *gr)
 bool grit_xp_gbfs(GritRec *gr)
 {
 	FILE *fout = NULL;
-	int ii, jj;
 
 	// for new data
 	int gr_count;
@@ -731,7 +730,7 @@ bool grit_xp_gbfs(GritRec *gr)
 	int gb_count;
 	GBFS_ENTRY *gbenL= gr_gben, *gbenD= NULL;
 
-	ii= 0;
+	int ii = 0;
 
 	// --- register the various fields ---
 
@@ -848,7 +847,7 @@ bool grit_xp_gbfs(GritRec *gr)
 			if(gbenL == NULL)
 				continue;
 			// Obsolete found; remove from list;
-			jj= (gbenL-gbenD);
+			int jj= gbenL - gbenD;
 			old_count--;
 			memmove(gbenL, gbenL+1, (old_count-jj)*GBEN_SIZE);
 		}
@@ -865,7 +864,7 @@ bool grit_xp_gbfs(GritRec *gr)
 			fseek(fin, gbenD[i].data_offset, SEEK_SET);
 			gbenD[i].data_offset= fpos;
 
-			jj= gbenD[i].len >> 10;
+			int jj = gbenD[i].len >> 10;
 			while (jj--)
 			{
 				fread(buf, 1024, 1, fin);
