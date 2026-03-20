@@ -98,8 +98,7 @@ endif
 
 WARNFLAGS_C	:= -Wall -Wextra -Wpedantic -Wstrict-prototypes
 
-# TODO: Fix the disabled warnings
-WARNFLAGS_CXX	:= -Wall -Wextra -Wno-unused-result
+WARNFLAGS_CXX	:= -Wall -Wextra
 
 ifeq ($(SOURCES_CPP),)
     HOSTLD	:= $(HOSTCC)
