@@ -727,7 +727,7 @@ bool grit_xp_gbfs(GritRec *gr)
 	GBFS_ENTRY gr_gben[4];
 
 	// for total data
-	int gb_count;
+	size_t gb_count;
 	GBFS_ENTRY *gbenL= gr_gben, *gbenD= NULL;
 
 	int ii = 0;
@@ -789,7 +789,7 @@ bool grit_xp_gbfs(GritRec *gr)
 		return false;
 	}
 
-	u32 fpos= GBFL_SIZE + gr_count*GBEN_SIZE;
+	long fpos= GBFL_SIZE + gr_count*GBEN_SIZE;
 	if (fseek(fout, fpos, SEEK_SET) < 0) // skip directory
 	{
 		lprintf(LOG_ERROR, "Failed to seek position in GBFS file.\n");
@@ -829,8 +829,8 @@ bool grit_xp_gbfs(GritRec *gr)
 		gbenD= (GBFS_ENTRY*)malloc(old_count*GBEN_SIZE);
 		if (gbenD == NULL)
 		{
-			lprintf(LOG_WARNING, "Failed to allocate memory for '%s'.\n", name);
-			goto append_error;
+			lprintf(LOG_ERROR, "Failed to allocate memory for '%s'.\n", name);
+			exit(EXIT_FAILURE);
 		}
 
 		// Read directory
@@ -857,32 +857,75 @@ bool grit_xp_gbfs(GritRec *gr)
 		// obsoletes are removed; write the rest to fout
 		BYTE buf[1024];
 		fpos= GBFL_SIZE + gb_count*GBEN_SIZE;
-		fseek(fout, fpos, SEEK_SET);
+		if (fseek(fout, fpos, SEEK_SET) < 0)
+		{
+			lprintf(LOG_ERROR, "Failed to fseek output file (1)\n");
+			exit(EXIT_FAILURE);
+		}
 
 		for (size_t i = 0; i < old_count; i++)
 		{
-			fseek(fin, gbenD[i].data_offset, SEEK_SET);
+			if (fseek(fin, gbenD[i].data_offset, SEEK_SET) < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to fseek output file (2)\n");
+				exit(EXIT_FAILURE);
+			}
+
 			gbenD[i].data_offset= fpos;
 
 			int jj = gbenD[i].len >> 10;
 			while (jj--)
 			{
-				fread(buf, 1024, 1, fin);
-				fwrite(buf, 1024, 1, fout);
+				if (fread(buf, 1024, 1, fin) != 1)
+				{
+					lprintf(LOG_ERROR, "Failed to read input for '%s' (1)\n", name);
+					exit(EXIT_FAILURE);
+				}
+				if (fwrite(buf, 1024, 1, fout) != 1)
+				{
+					lprintf(LOG_ERROR, "Failed to write output for '%s' (1)\n", name);
+					exit(EXIT_FAILURE);
+				}
 			}
 			if ((jj= gbenD[i].len & 1023) != 0)
 			{
-				fread(buf, jj, 1, fin);
-				fwrite(buf, jj, 1, fout);
+				if (fread(buf, jj, 1, fin) != 1)
+				{
+					lprintf(LOG_ERROR, "Failed to read input for '%s' (2)\n", name);
+					exit(EXIT_FAILURE);
+				}
+				if (fwrite(buf, jj, 1, fout) != 1)
+				{
+					lprintf(LOG_ERROR, "Failed to write output for '%s' (2)\n", name);
+					exit(EXIT_FAILURE);
+				}
 			}
 
 			// pad to 16byte boundary
-			for(fpos=ftell(fout); fpos & 0x0F; fpos++)
-				fputc(0, fout);
+			fpos = ftell(fout);
+			if (fpos < 0)
+			{
+				lprintf(LOG_ERROR, "Failed to get file size for '%s'\n", name);
+				exit(EXIT_FAILURE);
+			}
+
+			for (; fpos & 0x0F; fpos++)
+			{
+				if (fputc(0, fout) == EOF)
+				{
+					lprintf(LOG_ERROR, "Failed to pad output file for '%s'\n", name);
+					exit(EXIT_FAILURE);
+				}
+			}
 		}
 
 		// Combine lists
 		gbenL= (GBFS_ENTRY*)malloc(gb_count*GBEN_SIZE);
+		if (gbenL == NULL)
+		{
+			lprintf(LOG_ERROR, "Failed to allocate memory\n");
+			exit(EXIT_FAILURE);
+		}
 		memcpy(gbenL, gr_gben, gr_count*GBEN_SIZE);
 		memcpy(&gbenL[gr_count], gbenD, old_count*GBEN_SIZE);
 		free(gbenD);
@@ -907,15 +950,38 @@ append_error:
 	
 	// Write entries' data
 	// NOTE: only new data; 'old' data is already take care of
-	fpos= ftell(fout);
+	fpos = ftell(fout);
+	if (fpos < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to get current position\n");
+		exit(EXIT_FAILURE);
+	}
+
 	for(ii=0; ii<gr_count; ii++)
 	{
 		gbenL[ii].data_offset= fpos;
-		fwrite(gr_data[ii], gbenL[ii].len, 1, fout);
+		if (fwrite(gr_data[ii], gbenL[ii].len, 1, fout) != 1)
+		{
+			lprintf(LOG_ERROR, "Failed to get write element %zu\n", ii);
+			exit(EXIT_FAILURE);
+		}
 
 		// pad to 16byte boundary
-		for(fpos=ftell(fout); fpos & 0x0F; fpos++)
-			fputc(0, fout);
+		fpos = ftell(fout);
+		if (fpos < 0)
+		{
+			lprintf(LOG_ERROR, "Failed to get position of element %zu\n", ii);
+			exit(EXIT_FAILURE);
+		}
+
+		for (; fpos & 0x0F; fpos++)
+		{
+			if (fputc(0, fout) == EOF)
+			{
+				lprintf(LOG_ERROR, "Failed to pad output file for '%s'\n", name);
+				exit(EXIT_FAILURE);
+			}
+		}
 	}
 
 	gbhdr.dir_nmemb= gb_count;
@@ -926,16 +992,35 @@ append_error:
 	qsort(gbenL, gb_count, GBEN_SIZE, gbfs_namecmp);
 
 	// Write header and directory
-	rewind(fout);		
-	fwrite(&gbhdr, GBFL_SIZE, 1, fout);
-	fwrite(gbenL, GBEN_SIZE, gb_count, fout);
+	rewind(fout);
+
+	if (fwrite(&gbhdr, GBFL_SIZE, 1, fout) != 1)
+	{
+		lprintf(LOG_ERROR, "Failed to write header for '%s'\n", name);
+		exit(EXIT_FAILURE);
+	}
+
+	if (fwrite(gbenL, GBEN_SIZE, gb_count, fout) != gb_count)
+	{
+		lprintf(LOG_ERROR, "Failed to write elements for '%s'\n", name);
+		exit(EXIT_FAILURE);
+	}
 
 	SAFE_FREE(gbenD);
 	fclose(fout);
 
 	// rename to real name
-	remove(name);
-	rename("gbfs.tmp", name);
+	if (remove(name) < 0)
+	{
+		// If this fails, rename() can still try to overwrite the file
+		lprintf(LOG_WARNING, "Failed to delete original file '%s'\n", name);
+	}
+
+	if (rename("gbfs.tmp", name) < 0)
+	{
+		lprintf(LOG_ERROR, "Failed to rename temporary file to '%s'\n", name);
+		exit(EXIT_FAILURE);
+	}
 
 	return true;
 
