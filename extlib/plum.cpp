@@ -13,6 +13,7 @@
 #include "cldib_core.h"
 #include "cldib_tools.h"
 #include "libplum.h"
+#include "logger.h"
 #include "plum.h"
 
 // ! Initialize libplum and related materials
@@ -112,7 +113,7 @@ CLDIB *cldib_load(const char *fpath, void *extra)
 		16384 * 16384, &error);
 
 	if(image == NULL) {
-		fprintf(stderr, "Error loading image '%s': %s (%u)\n", fpath, plum_get_error_text(error), error);
+		lprintf(LOG_ERROR, "Error loading image '%s': %s (%u)\n", fpath, plum_get_error_text(error), error);
 		return NULL;
 	}
 
@@ -134,7 +135,7 @@ bool cldib_save(const CLDIB *dib, const char *fpath, void *extra)
 	size_t len = plum_store_image(image, (void*) fpath, PLUM_MODE_FILENAME, &error);
 
 	if(len == 0) {
-		fprintf(stderr, "Error saving image '%s': %s (%u)\n", fpath, plum_get_error_text(error), error);
+		lprintf(LOG_ERROR, "Error saving image '%s': %s (%u)\n", fpath, plum_get_error_text(error), error);
 		return false;
 	} else {
 		return true;
