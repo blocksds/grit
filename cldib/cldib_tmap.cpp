@@ -256,28 +256,28 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 	}
 	else
 	{
-	for(ty=0; ty<mapH; ty++)
-	{
-		for(tx=0; tx<mapW; tx++)
+		for(ty=0; ty<mapH; ty++)
 		{
-			// Prep comparison DIB
-			for(iy=0; iy<tileH; iy++)
-				memcpy(&tmpD[iy*tmpP], 
-					dib_get_img_at(dib, tx*tileW, ty*tileH+iy), tmpP);
-			
-			me= dib_find(tmpDib, rdx, rdxN, flags);
-
-			// Not found? Add to tileset
-				if(me.index() >= (int)rdxN)
+			for(tx=0; tx<mapW; tx++)
 			{
-				memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
-					dib_get_size_img(tmpDib));
-				rdxN++;
-			}
+				// Prep comparison DIB
+				for(iy=0; iy<tileH; iy++)
+					memcpy(&tmpD[iy*tmpP],
+						dib_get_img_at(dib, tx*tileW, ty*tileH+iy), tmpP);
 
-			mapD[ty*mapW+tx]= me;
+				me= dib_find(tmpDib, rdx, rdxN, flags);
+
+				// Not found? Add to tileset
+				if(me.index() >= (int)rdxN)
+				{
+					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
+						dib_get_size_img(tmpDib));
+					rdxN++;
+				}
+
+				mapD[ty*mapW+tx]= me;
+			}
 		}
-	}
 	}
 
 	// Shrink tileset
