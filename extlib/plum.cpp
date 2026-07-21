@@ -126,10 +126,32 @@ bool cldib_save(const CLDIB *dib, const char *fpath, void *extra)
 {
 	(void)extra;
 
+	// Detect the extension that we need to use to save the file
+	size_t fpath_len = strlen(fpath);
+	const char *extension = fpath + fpath_len - strlen(".XXX");
+
+	unsigned int type;
+
+	if(strcasecmp(extension, ".png") == 0) {
+		type = PLUM_IMAGE_PNG;
+		lprintf(LOG_STATUS, "Saving image as PNG: %s\n", fpath);
+	} else if(strcasecmp(extension, ".bmp") == 0) {
+		type = PLUM_IMAGE_BMP;
+		lprintf(LOG_STATUS, "Saving image as BMP: %s\n", fpath);
+	} else if(strcasecmp(extension, ".gif") == 0) {
+		type = PLUM_IMAGE_GIF;
+		lprintf(LOG_STATUS, "Saving image as GIF: %s\n", fpath);
+	} else {
+		lprintf(LOG_ERROR, "Invalid image format: %s\n", fpath);
+		return false;
+	}
+
 	struct plum_image *image = dib2plum((CLDIB*) dib);
 
 	if(image == NULL)
 		return false;
+
+	image->type = type;
 
 	unsigned error;
 	size_t len = plum_store_image(image, (void*) fpath, PLUM_MODE_FILENAME, &error);
