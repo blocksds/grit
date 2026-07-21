@@ -205,12 +205,15 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 
 	if(extTiles != NULL && dibB == dib_get_bpp(extTiles))
 	{
+		// Create our working dib "rdx" as a copy of the external tiles of
+		// "extTiles" and the new tiles of "dib".
 		rdxN= dib_get_height(extTiles)/tileH;
 		rdx = dib_copy(extTiles, 0, 0, tileW, (mapN+rdxN)*tileH, false);
 	}
 	else
 	{
-		rdxN= 1;					
+		// Create our working dib "rdx" with enough space for the tiles of "dib"
+		rdxN= 1;
 		rdx = dib_alloc(tileW, (mapN+rdxN)*tileH, dibB, NULL);
 		memset(dib_get_img(rdx), 0, dib_get_pitch(rdx)*tileH);
 		dib_pal_cpy(rdx, dib);
@@ -280,8 +283,10 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 		}
 	}
 
-	// Shrink tileset
+	// Free temporary tile
 	dib_free(tmpDib);
+
+	// Shrink tileset
 	tmpDib= dib_copy(rdx, 0, 0, tileW, rdxN*tileH, false);
 	dib_free(rdx);
 
