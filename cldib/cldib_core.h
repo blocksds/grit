@@ -279,17 +279,17 @@ INLINE int dib_align(int width, int bpp);	// align to 32bit boundary
 //! \name DIB information
 // \{
 
-INLINE int dib_padding(CLDIB *dib);			// # padding bytes
-INLINE int dib_get_size(CLDIB *dib);
-INLINE bool dib_is_topdown(CLDIB *dib);
+INLINE int dib_padding(const CLDIB *dib);			// # padding bytes
+INLINE int dib_get_size(const CLDIB *dib);
+INLINE bool dib_is_topdown(const CLDIB *dib);
 
-INLINE int dib_get_width(CLDIB *dib);
-INLINE int dib_get_height(CLDIB *dib);		// always >0
-INLINE int dib_get_height2(CLDIB *dib);		// signed height
-INLINE int dib_get_bpp(CLDIB *dib);
-INLINE int dib_get_pitch(CLDIB *dib);
-INLINE int dib_get_nclrs(CLDIB *dib);
-INLINE int dib_get_size_img(CLDIB *dib);
+INLINE int dib_get_width(const CLDIB *dib);
+INLINE int dib_get_height(const CLDIB *dib);		// always >0
+INLINE int dib_get_height2(const CLDIB *dib);		// signed height
+INLINE int dib_get_bpp(const CLDIB *dib);
+INLINE int dib_get_pitch(const CLDIB *dib);
+INLINE int dib_get_nclrs(const CLDIB *dib);
+INLINE int dib_get_size_img(const CLDIB *dib);
 
 bool dib_get_attr(CLDIB *dib, int *width, int *height, int *bpp, int *pitch);
 // \}
@@ -297,7 +297,7 @@ bool dib_get_attr(CLDIB *dib, int *width, int *height, int *bpp, int *pitch);
 //! \name DIB sections
 // \{
 
-INLINE BITMAPINFOHEADER *dib_get_hdr(CLDIB *dib);
+INLINE BITMAPINFOHEADER *dib_get_hdr(const CLDIB *dib);
 INLINE BITMAPINFO *dib_get_info(CLDIB *dib);
 INLINE RGBQUAD *dib_get_pal(CLDIB *dib);
 INLINE BYTE *dib_get_img(CLDIB *dib);
@@ -313,7 +313,7 @@ BYTE *dib_get_img_at(CLDIB *dib, int x, int y);
 CLDIB *dib_alloc(int width, int height, int bpp, const BYTE *data, 
 	bool bTopDown=true);
 void dib_free(CLDIB *dib);
-CLDIB *dib_clone(CLDIB *src);
+CLDIB *dib_clone(const CLDIB *src);
 bool dib_mov(CLDIB *dst, CLDIB *src);
 INLINE RGBQUAD *dib_pal_cpy(CLDIB *dst, CLDIB *src);
 CLDIB *dib_copy(CLDIB *src, int ll, int tt, int rr, int bb, bool bClip);
@@ -510,15 +510,15 @@ INLINE int dib_align(int width, int bpp)
 {	return ((width*bpp+31)>>5)*4;				}
 
 //! Calculate the number of padding bytes.
-INLINE int dib_padding(CLDIB *dib)
+INLINE int dib_padding(const CLDIB *dib)
 {	return ((dib_get_width(dib)*dib_get_bpp(dib))>>3)&3;	}
 
 //! Full size of dib in bytes.
-INLINE int dib_get_size(CLDIB *dib)
+INLINE int dib_get_size(const CLDIB *dib)
 {	return BMIH_SIZE + dib_get_nclrs(dib)*RGB_SIZE + dib_get_size_img(dib);	}
 
 //! Indicated whether the DIB is top-down or bottom-up (default).
-INLINE bool dib_is_topdown(CLDIB *dib)
+INLINE bool dib_is_topdown(const CLDIB *dib)
 {	return dib_get_height2(dib) < 0;	}
 
 //! Copy the palette of two dibs.
@@ -531,7 +531,7 @@ INLINE RGBQUAD *dib_pal_cpy(CLDIB *dst, CLDIB *src)
 // --- dib accessors ---
 
 //! Returns pointer to the BITMAPINFOHEADER struct.
-INLINE BITMAPINFOHEADER *dib_get_hdr(CLDIB *dib)
+INLINE BITMAPINFOHEADER *dib_get_hdr(const CLDIB *dib)
 {	return (BITMAPINFOHEADER*)(dib->data);		}
 
 //! Returns pointer to the BITMAPINFO struct.
@@ -552,34 +552,34 @@ INLINE BYTE *dib_get_img(CLDIB *dib)
 // --- dib attributes ---
 
 //! Returns DIB's width in pixels.
-INLINE int dib_get_width(CLDIB *dib)
+INLINE int dib_get_width(const CLDIB *dib)
 {	return dib_get_hdr(dib)->biWidth;			}
 
 //! Returns DIB's number of scanlines.
-INLINE int dib_get_height(CLDIB *dib)
+INLINE int dib_get_height(const CLDIB *dib)
 {
 	int hh= dib_get_hdr(dib)->biHeight;
 	return hh>0 ? hh : -hh;
 }
 
 //! Returns the height field; may be negative.
-INLINE int dib_get_height2(CLDIB *dib)
+INLINE int dib_get_height2(const CLDIB *dib)
 {	return dib_get_hdr(dib)->biHeight;			}
 
 //! Returns the bitdepth.
-INLINE int dib_get_bpp(CLDIB *dib)
+INLINE int dib_get_bpp(const CLDIB *dib)
 {	return dib_get_hdr(dib)->biBitCount;		}
 
 //! Returns the scanline size in bytes.
-INLINE int dib_get_pitch(CLDIB *dib)
+INLINE int dib_get_pitch(const CLDIB *dib)
 {	return dib_align(dib_get_width(dib), dib_get_bpp(dib));		}
 
 //! Returns the number of used palette colors/palette size.
-INLINE int dib_get_nclrs(CLDIB *dib)
+INLINE int dib_get_nclrs(const CLDIB *dib)
 {	return dib_get_hdr(dib)->biClrUsed;			}
 
 //! Returns the number of bytes of the image itself.
-INLINE int dib_get_size_img(CLDIB *dib)
+INLINE int dib_get_size_img(const CLDIB *dib)
 {	return dib_get_hdr(dib)->biSizeImage;		}
 
 

@@ -27,42 +27,53 @@ void plumInit()
 
 #define CLDIB_PLUM_COLOR_FORMAT (PLUM_COLOR_32 | PLUM_ALPHA_INVERT)
 
-struct plum_image *dib2plum(CLDIB *dib)
+struct plum_image *dib2plum(const CLDIB *dib)
 {
 	if(dib == NULL)
 		return NULL;
 
-	dib_convert(dib, dib_get_bpp(dib) < 8 ? 8 : 32, 0, false);
-
 	struct plum_image *image = plum_new_image();
 	if(image == NULL)
 		return NULL;
-	image->width = dib_get_width(dib);
-	image->height = dib_get_height(dib);
+
+	// Clone the image so that we can convert it without modifying the original
+	CLDIB *tmp = dib_clone(dib);
+	if(tmp == NULL) {
+		plum_destroy_image(image);
+		return NULL;
+	}
+
+	dib_convert(tmp, dib_get_bpp(tmp) < 8 ? 8 : 32, 0, false);
+
+	image->width = dib_get_width(tmp);
+	image->height = dib_get_height(tmp);
 	image->color_format = CLDIB_PLUM_COLOR_FORMAT;
 	image->max_palette_index = 0;
 	image->frames = 1;
 
-	if (dib_get_bpp(dib) == 32) {
+	if (dib_get_bpp(tmp) == 32) {
 		image->data = plum_malloc(image, sizeof(uint32_t) * image->width * image->height);
 		if (image->data == NULL) {
 			plum_destroy_image(image);
+			dib_free(tmp);
 			return NULL;
 		}
-		memcpy(image->data, dib_get_img(dib), sizeof(uint32_t) * image->width * image->height);
-	} else if (dib_get_bpp(dib) == 8) {
-		int nclrs = dib_get_nclrs(dib);
+		memcpy(image->data, dib_get_img(tmp), sizeof(uint32_t) * image->width * image->height);
+	} else if (dib_get_bpp(tmp) == 8) {
+		int nclrs = dib_get_nclrs(tmp);
 		image->max_palette_index = nclrs - 1;
 		image->data = plum_malloc(image, sizeof(uint8_t) * image->width * image->height);
 		image->palette = plum_malloc(image, sizeof(uint32_t) * nclrs);
 		if (image->data == NULL || image->palette == NULL) {
 			plum_destroy_image(image);
+			dib_free(tmp);
 			return NULL;
 		}
-		memcpy(image->data, dib_get_img(dib), sizeof(uint8_t) * image->width * image->height);
-		memcpy(image->palette, dib_get_pal(dib), sizeof(uint32_t) * nclrs);
+		memcpy(image->data, dib_get_img(tmp), sizeof(uint8_t) * image->width * image->height);
+		memcpy(image->palette, dib_get_pal(tmp), sizeof(uint32_t) * nclrs);
 	}
 
+	dib_free(tmp);
 	return image;
 }
 
@@ -146,7 +157,7 @@ bool cldib_save(const CLDIB *dib, const char *fpath, void *extra)
 		return false;
 	}
 
-	struct plum_image *image = dib2plum((CLDIB*) dib);
+	struct plum_image *image = dib2plum(dib);
 
 	if(image == NULL)
 		return false;

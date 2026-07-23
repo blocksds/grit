@@ -152,7 +152,7 @@ void dib_free(CLDIB *dib)
 /*!	\param src	Bitmap to clone.
 *	\return Cloned bitmap
 */
-CLDIB *dib_clone(CLDIB *src)
+CLDIB *dib_clone(const CLDIB *src)
 {
 	if(src == NULL)
 		return NULL;
