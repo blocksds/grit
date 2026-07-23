@@ -13,6 +13,7 @@
 #include "cldib_core.h"
 #include "cldib_tools.h"
 #include "cldib_tmap.h"
+#include "logger.h"
 
 // --------------------------------------------------------------------
 // PROTOTYPES
@@ -203,8 +204,13 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 	u32 rdxN;
 	CLDIB *rdx;
 
-	if(extTiles != NULL && dibB == dib_get_bpp(extTiles))
+	if(extTiles != NULL)
 	{
+		if(dibB != dib_get_bpp(extTiles)) {
+			lprintf(LOG_ERROR, "Mismatched BPP (%d != %d)\n", dibB, dib_get_bpp(extTiles));
+			exit(EXIT_FAILURE);
+		}
+
 		// Create our working dib "rdx" as a copy of the external tiles of
 		// "extTiles" and the new tiles of "dib".
 		rdxN= dib_get_height(extTiles)/tileH;
