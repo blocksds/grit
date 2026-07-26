@@ -112,7 +112,7 @@ const char appHelpText[]=
 "-fa            File append\n"
 "-fh | -fh!     Create header or not [create header]\n"
 "-ff{name}      Additional options read from flag file [dst-name.grit]\n"
-"-fx{name}      External tileset file\n"
+"-fx{name}      External tileset file to load or to use as destination.\n"
 "-o{name}       Destination filename [based on source]\n"
 "-s{name}       Symbol base name [based from dst]\n"
 "-D{path}       Destination folder for non-shared data\n"
@@ -829,6 +829,8 @@ bool grit_save_ext_tiles(GritRec *gr)
 
 	lprintf(LOG_STATUS, "Saving tile file: `%s'.\n", grs->tilePath);
 
+	lprintf(LOG_ERROR, "  This code is buggy!\n");
+
 	if(grs->dib == NULL)
 		return true;
 
@@ -1045,9 +1047,14 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 
 	grs->gfxBpp= gr->gfxBpp;
 
-	// Read external tile file
+	bool ext_tiles_loaded = false;
+
+	// Try to read external tile file. If it exists, don't try to save the
+	// shared tileset to the same file later.
 	if(gr->gfxIsShared)
-		grit_load_ext_tiles(gr);
+	{
+		ext_tiles_loaded = grit_load_ext_tiles(gr);
+	}
 
 	if(gr->palIsShared)
 	{
@@ -1104,9 +1111,13 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 
 	// --- Shared data conversion ---
 
-	// Save ext tiles
-	if(gr->gfxIsShared)
-		grit_save_ext_tiles(gr);
+	// Save ext tiles to "-fx" path, but only if the file didn't exist before
+	// (and we have loaded tiles from it).
+	if(gr->gfxIsShared) {
+		// TODO: This is broken, don't expect it to work correctly
+		if(!ext_tiles_loaded)
+			grit_save_ext_tiles(gr);
+	}
 
 	// Special init for shared data (move to ~E~ later).
 	grit_clear(gr);

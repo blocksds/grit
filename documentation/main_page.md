@@ -290,10 +290,11 @@ External configuration options:
 External tileset options:
 
 - `-fx <path>`: External tileset bitmap which can then be shared between
-  different tilemaps. Implies `-gS`. **NOTE**. This is still a little fickle.
-  The file must already be in the correct format: a column or reduced tiles with
-  8bpp. If the file-type does not support 8bpp, a `.bmp` of the same name will
-  be used.
+  different tilemaps. Implies `-gS`. This can take the path of a file that
+  already exists (which will be loaded and used as base for the tile maps) or a
+  file that doesn't exist yet (so the tileset will be created as a combination
+  of the tile sets of all input images). **NOTE**: Output mode is currently
+  broken.
 
 Destination options:
 
