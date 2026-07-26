@@ -292,7 +292,7 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 	// Free temporary tile
 	dib_free(tmpDib);
 
-	// Shrink tileset
+	// Shrink tileset to its actual size (dib_find() has already optimized it)
 	tmpDib= dib_copy(rdx, 0, 0, tileW, rdxN*tileH, false);
 	dib_free(rdx);
 

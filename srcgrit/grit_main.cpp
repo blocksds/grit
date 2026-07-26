@@ -530,20 +530,8 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 	{
 		strcpy(str, pstr);
 		path_fix_sep(str);
-/*
-		// Check for bitdepth support
-		FREE_IMAGE_FORMAT fif= FreeImage_GetFIFFromFilename(str);
-		FI_SUPPORT_MODE fsm=  fiGetSupportModes(fif);
 
-		// No 8bpp support for filetype? Change to bmp
-		if(~fsm & FIF_MODE_EXP_8BPP)
-		{
-			lprintf(LOG_WARNING, 
-"Filetype of %s doesn't allow 8bpp export. Switching to bmp.\n", 
-				path_get_name(str));
-			path_repl_ext(str, str, "bmp", MAXPATHLEN);				
-		}
-*/
+		// Save the path to be used later to load the file or generate a new one
 		strrepl(&gr->shared->tilePath, str);
 		gr->gfxIsShared= true;
 
