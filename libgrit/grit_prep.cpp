@@ -256,9 +256,8 @@ bool grit_prep_work_dib(GritRec *gr)
 			rgb= &gr->gfxAlphaColor;
 			RGBQUAD *pal= dib_get_pal(dib);
 
-			lprintf(LOG_WARNING,
-				"  tru/pal -> pal conversion with transp color option.\n"
-				"    looking for color %02X%02X%02X in palette.\n",
+			lprintf(LOG_WARNING, "  tru/pal -> pal conversion with transp color option.\n");
+			lprintf(LOG_WARNING, "    looking for color %02X%02X%02X in palette.\n",
 				rgb->rgbRed, rgb->rgbGreen, rgb->rgbBlue);
 
 			uint ii_min= 0, dist, dist_min;
