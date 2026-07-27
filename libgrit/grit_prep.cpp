@@ -430,6 +430,8 @@ bool grit_prep_tiles(GritRec *gr)
 	}
 
 	lprintf(LOG_STATUS, "Tile preparation complete.\n");		
+	lprintf(LOG_STATUS, "  Total tiles: %u.\n", dib_get_height(gr->_dib) / tileH);
+
 	return true;
 }
 
@@ -562,6 +564,9 @@ bool grit_prep_map(GritRec *gr)
 	mf= gr->msFormat;
 
 	tileN= tmap_get_tilecount(map);
+
+	lprintf(LOG_STATUS, "  Cumulative total number of tiles: %d\n", tileN);
+
 	if(tileN >= (1<<mf.idLen))
 	{
 		lprintf(LOG_ERROR, "Number of tiles (%d) exceeds field limit (%d).\n", 
