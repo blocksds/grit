@@ -357,14 +357,17 @@ bool grit_prep_work_dib(GritRec *gr)
 			SWAP3(pal[0], pal[gr->palAlphaId], tmp);
 		}
 
-		// TODO: Palette merging.
+		// Palette merging.
 		if(gr->palIsShared)
 		{
 			lprintf(LOG_STATUS, "  Palette merging\n");
 			nn= dib_pal_reduce(dib, &gr->shared->palRec);
 			lprintf(LOG_STATUS, "    New palette has %d colors\n", nn);
-			if(nn>PAL_MAX)
-				lprintf(LOG_WARNING, "    New palette exceeds 256. Truncating.\n");
+			if(nn>PAL_MAX) {
+				lprintf(LOG_ERROR, "    New palette exceeds max size (%d > %d).\n",
+						nn, PAL_MAX);
+				return false;
+			}
 		}
 	}
 
