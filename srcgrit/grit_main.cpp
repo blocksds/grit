@@ -829,8 +829,6 @@ bool grit_save_ext_tiles(GritRec *gr)
 
 	lprintf(LOG_STATUS, "Saving tile file: `%s'.\n", grs->tilePath);
 
-	lprintf(LOG_ERROR, "  This code is buggy!\n");
-
 	if(grs->dib == NULL)
 		return true;
 
@@ -845,6 +843,12 @@ bool grit_save_ext_tiles(GritRec *gr)
 		lprintf(LOG_WARNING, "  No tilefile path. Tilefile save failed.\n");
 		return false;
 	}
+
+	// TODO: The code that calls grit_save_ext_tiles() is buggy, but it doesn't
+	// always result in an attempt to create a file. tilePath only has a valid
+	// path if if `-fx` is used. We should only show an error message in this
+	// case, not if grit_save_ext_tiles() is called without a valid tilePath.
+	lprintf(LOG_ERROR, "  This code is buggy!\n");
 
 	if(dib_save(grs->dib, grs->tilePath, NULL) == false)
 	{
