@@ -774,7 +774,7 @@ bool grit_load_shared_pal(GritRec *gr)
 */
 bool grit_load_ext_tiles(GritRec *gr)
 {
-	lprintf(LOG_STATUS, "Loading tile file.\n");
+	lprintf(LOG_STATUS, "Loading external tileset file.\n");
 
 	if(dib_load == NULL)
 	{
@@ -796,15 +796,57 @@ bool grit_load_ext_tiles(GritRec *gr)
 	if(dib == NULL)
 	{
 		lprintf(LOG_WARNING, "  Can't load tile file \"%s\".\n", grs->tilePath);
-		return false;	
+		return false;
 	}
 
-// Convert to 8xh@8 if necessary
+	// Check that grit is trying to convert to 8 bpp
+	if(gr->gfxBpp != 8)
+	{
+		lprintf(LOG_ERROR, "  Invalid target bpp for external tile file: %d bpp\n",
+				gr->gfxBpp);
+		return false;
+	}
+
+	// Convert to 8 pixels of width (any height) and 8 bpp if necessary
 	if( dib_get_bpp(dib) < 8 )
 	{
 		lprintf(LOG_WARNING, "  External tileset bpp < 8. Converting to 8.\n");
 		dib_convert(dib, 8, 0, false);
 	}
+
+	lprintf(LOG_STATUS, "  External tileset size: %dx%d\n",
+			dib_get_width(dib), dib_get_height(dib));
+
+	lprintf(LOG_STATUS, "  Converting into tiles: %dx%d\n",
+			gr->tileWidth, gr->tileHeight);
+
+	if( (dib_get_width(dib) % gr->tileWidth) != 0 )
+	{
+		lprintf(LOG_ERROR, "External tileset width %d isn't a multiple of tile width %d.\n",
+				dib_get_width(dib), gr->tileWidth);
+		return false;
+	}
+
+	if( (dib_get_height(dib) % gr->tileHeight) != 0)
+	{
+		lprintf(LOG_ERROR, "External tileset height %d isn't a multiple of tile height %d.\n",
+				dib_get_height(dib), gr->tileHeight);
+		return false;
+	}
+
+	int nWidth = dib_get_width(dib) / gr->tileWidth;
+	int nHeight = dib_get_height(dib) / gr->tileHeight;
+
+	lprintf(LOG_STATUS, "  Resulting tiles: %dx%d = %d\n", nWidth, nHeight,
+			nWidth * nHeight);
+
+	// Convert from 32/24 bpp to 8 bpp
+	if( dib_get_bpp(dib) > 8 )
+	{
+		bool allocTransparent = true;
+		dib_convert(dib, gr->gfxBpp, 0, allocTransparent);
+	}
+
 /*
 	// TODO: allow for metatiled sets
 	// PONDER: shouldn't this go somewhere else?
@@ -814,6 +856,25 @@ bool grit_load_ext_tiles(GritRec *gr)
 		dib_redim(dib, 8, 8, 0);
 	}
 */
+
+    // Now load the palette of the tileset
+	{
+		// TODO: Don't load the palette here if there is already an external
+		// palette, force the external tileset to use the palette that is
+		// loaded.
+
+		free(grs->palRec.data);
+		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
+		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
+
+		int nn= dib_pal_reduce(dib, &gr->shared->palRec);
+
+		lprintf(LOG_STATUS, "  External tileset colors: %d / %d\n", nn,
+				dib_get_nclrs(dib));
+
+		grs->palRec.width = 4;
+		grs->palRec.height = nn;
+	}
 
 	lprintf(LOG_STATUS, "  External tileset `%s' loaded\n", grs->tilePath);
 
@@ -1053,17 +1114,17 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 
 	bool ext_tiles_loaded = false;
 
+	if(gr->palIsShared)
+	{
+	    grit_parse_shared(gr, args);
+	    grit_load_shared_pal(gr);
+	}
+
 	// Try to read external tile file. If it exists, don't try to save the
 	// shared tileset to the same file later.
 	if(gr->gfxIsShared)
 	{
 		ext_tiles_loaded = grit_load_ext_tiles(gr);
-	}
-
-	if(gr->palIsShared)
-	{
-	    grit_parse_shared(gr, args);
-	    grit_load_shared_pal(gr);
 	}
 
 	for(ii=0; ii<fpaths.size(); ii++)
