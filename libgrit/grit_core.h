@@ -224,6 +224,7 @@ struct GritShared
 {
 	echar	 sharedMode;	//!< Main mode.
 	echar	 logMode;		//!< Logging level
+	char	*palettePath;	//!< Path to external palette (can be NULL)
 	char	*tilePath;		//!< Path to external tileset (can be NULL)
 	char	*symName;		//!< Shared symbol name
 	char	*dstPath;		//!< Path to shared datastore (can be NULL)

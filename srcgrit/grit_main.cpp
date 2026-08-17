@@ -30,6 +30,7 @@
 	good time to go for strings iso char*s as well?
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -112,6 +113,7 @@ const char appHelpText[]=
 "-fa            File append\n"
 "-fh | -fh!     Create header or not [create header]\n"
 "-ff{name}      Additional options read from flag file [dst-name.grit]\n"
+"-fw{name}      External palette file to load.\n"
 "-fx{name}      External tileset file to load or to use as destination.\n"
 "-o{name}       Destination filename [based on source]\n"
 "-s{name}       Symbol base name [based from dst]\n"
@@ -523,6 +525,21 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		lprintf(LOG_STATUS, "Output file: '%s'.\n", gr->dstPath);
 	}
 
+	// --- External file (ext palette) ---
+
+	pstr= CLI_STR("-fw", "");
+	if( !isempty(pstr) )
+	{
+		strcpy(str, pstr);
+		path_fix_sep(str);
+
+		// Save the path to be used later to load the file or generate a new one
+		strrepl(&gr->shared->palettePath, str);
+		gr->palIsShared= true;
+
+		lprintf(LOG_STATUS, "Ext. palette path: %s.\n", gr->shared->palettePath);
+	}
+
 	// --- External file (ext tileset) ---
 
 	pstr= CLI_STR("-fx", "");
@@ -535,7 +552,7 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		strrepl(&gr->shared->tilePath, str);
 		gr->gfxIsShared= true;
 
-		lprintf(LOG_STATUS, "Ext file: %s.\n", gr->shared->tilePath);	
+		lprintf(LOG_STATUS, "Ext. tile set path: %s.\n", gr->shared->tilePath);
 	}
 
 	return true;
@@ -738,33 +755,72 @@ bool grit_prep_shared_output(GritRec*gr, const strvec &args)
 // External files
 // --------------------------------------------------------------------
 
-bool grit_load_shared_pal(GritRec *gr)
+bool grit_load_ext_pal(GritRec *gr)
 {
-    lprintf(LOG_STATUS, "Loading shared palette.\n");
+	lprintf(LOG_STATUS, "Loading external palette file.\n");
 
-    GritShared *grs = gr->shared;
-    char path[1024];
-    path_repl_ext(path, grs->dstPath, c_fileTypes[gr->fileType], MAXPATHLEN);
-
-    if(file_exists(path))
-    {
-	FILE* fp = fopen(path, "r");
-
-	int len;
-	int chunk;
-	if(!grs->palRec.data)
+	if(dib_load == NULL)
 	{
-	    grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
-	    memset(grs->palRec.data, 0, 512);
+		lprintf(LOG_WARNING, "  File reader not initialized. Palette file load failed.\n");
+		return false;
 	}
-	im_data_gas(fp, grs->symName, grs->palRec.data, &len, &chunk);
-	grs->palRec.width = 4;
-	grs->palRec.height = len;
-    }
-    else
-	lprintf(LOG_WARNING, "\tShared palette (%s) does not yet exist.\n", path);
 
-    return true;
+	GritShared *grs= gr->shared;
+
+	if(isempty(grs->palettePath))
+	{
+		lprintf(LOG_WARNING, "  No external palette path. Load failed.\n");
+		return false;
+	}
+
+	CLDIB *dib= NULL;
+	dib= dib_load(grs->palettePath, NULL);
+
+	if(dib == NULL)
+	{
+		lprintf(LOG_WARNING, "  Can't load palette file \"%s\".\n", grs->palettePath);
+		return false;
+	}
+
+	// Check that grit is trying to convert to 8 bpp
+	if(gr->gfxBpp != 8)
+	{
+		lprintf(LOG_ERROR, "  Invalid target bpp for external palette file: %d bpp\n",
+				gr->gfxBpp);
+		return false;
+	}
+
+	lprintf(LOG_STATUS, "  External palette size: %dx%d\n",
+			dib_get_width(dib), dib_get_height(dib));
+
+	// Convert from 32/24 bpp to 8 bpp
+	if( dib_get_bpp(dib) > 8 )
+	{
+		bool allocTransparent = true;
+		dib_convert(dib, gr->gfxBpp, 0, allocTransparent);
+	}
+
+	// Now load the palette of the tileset
+	{
+		assert(grs->palRec.data == NULL);
+
+		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
+		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
+
+		int nn = dib_pal_reduce(dib, &gr->shared->palRec);
+
+		lprintf(LOG_STATUS, "  External palette colors: %d\n", nn);
+
+		grs->palRec.width = 4;
+		grs->palRec.height = nn;
+	}
+
+	lprintf(LOG_STATUS, "  External palette `%s' loaded\n", grs->palettePath);
+
+	dib_free(grs->dib);
+	grs->dib= dib;
+
+	return true;
 }
 
 //! Load an external tile file.
@@ -786,7 +842,7 @@ bool grit_load_ext_tiles(GritRec *gr)
 
 	if(isempty(grs->tilePath))
 	{
-		lprintf(LOG_WARNING, "  No tilefile path. Tilefile load failed.\n");
+		lprintf(LOG_WARNING, "  No external tileset path. Load failed.\n");
 		return false;
 	}
 
@@ -858,12 +914,16 @@ bool grit_load_ext_tiles(GritRec *gr)
 */
 
     // Now load the palette of the tileset
+	if(grs->palRec.data)
 	{
 		// TODO: Don't load the palette here if there is already an external
 		// palette, force the external tileset to use the palette that is
 		// loaded.
-
-		free(grs->palRec.data);
+		lprintf(LOG_ERROR, "External tileset provided but there is also an external palette\n");
+		return false;
+	}
+	else
+	{
 		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
 		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
 
@@ -1044,7 +1104,7 @@ void args_set_mode(GritShared *grs, const strvec &args, const strvec &paths)
 {
 	bool bShared;
 
-	bShared= CLI_BOOL("-fx") || CLI_BOOL("-gS") || CLI_BOOL("-pS");
+	bShared= CLI_BOOL("-fw") || CLI_BOOL("-fx") || CLI_BOOL("-gS") || CLI_BOOL("-pS");
 
 	grs->sharedMode  = paths.size()>1 ? GRS_MULTI : GRS_SINGLE;
 	if(bShared)
@@ -1112,17 +1172,21 @@ int run_shared(GritRec *gr, const strvec &args, const strvec &fpaths)
 
 	grs->gfxBpp= gr->gfxBpp;
 
-	bool ext_tiles_loaded = false;
-
 	if(gr->palIsShared)
 	{
-	    grit_parse_shared(gr, args);
-	    grit_load_shared_pal(gr);
+		grit_parse_shared(gr, args);
+	}
+
+	bool ext_tiles_loaded = false;
+
+	if(CLI_BOOL("-fw"))
+	{
+		grit_load_ext_pal(gr);
 	}
 
 	// Try to read external tile file. If it exists, don't try to save the
 	// shared tileset to the same file later.
-	if(gr->gfxIsShared)
+	if(CLI_BOOL("-fx"))
 	{
 		ext_tiles_loaded = grit_load_ext_tiles(gr);
 	}
