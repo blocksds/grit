@@ -579,11 +579,7 @@ int grit_parse_log(GritRec *gr, const strvec &args)
 		return LOG_STATUS;
 	}
 
-#ifdef _DEBUG
-	return LOG_STATUS;
-#else
 	return LOG_ERROR;
-#endif
 }
 
 //! Parsing hub
