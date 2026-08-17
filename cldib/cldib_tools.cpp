@@ -310,14 +310,19 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 		if(histo[ii])
 		{
 			for(jj=0; jj<count; jj++)
-				if(rdxClr[jj] == dibClr[ii])
+			{
+				// Ignore alpha channel
+				if((rdxClr[jj] & 0xFFFFFF) == (dibClr[ii] & 0xFFFFFF))
 					break;
+			}
+
 			// Match: add color to table
 			if(jj == count)
 			{
 				rdxClr[jj]= dibClr[ii];
 				count++;
 			}
+
 			srcIdx[kk]= jj;
 			dstIdx[kk]= ii;
 			kk++;
