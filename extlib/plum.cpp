@@ -88,21 +88,38 @@ CLDIB *plum2dib(struct plum_image *fi)
 
 	CLDIB *dib;
 
-	if (fi->palette != NULL) {
-		int nclrs = ((int)fi->max_palette_index + 1);
+	if (fi->palette != NULL)
+	{
+		// If the original image has a palette, keep it.
+
 		dib = dib_alloc(fi->width, fi->height, 8, (const BYTE*) fi->data);
 		if (dib == NULL)
 			return NULL;
+
 		memset(dib_get_pal(dib), 0, sizeof(RGBQUAD) * 256);
+
+		int nclrs = ((int)fi->max_palette_index + 1);
 		plum_convert_colors(dib_get_pal(dib), fi->palette, nclrs, CLDIB_PLUM_COLOR_FORMAT, fi->color_format);
-	} else if (fi->color_format != CLDIB_PLUM_COLOR_FORMAT) {
+	}
+	else if (fi->color_format != CLDIB_PLUM_COLOR_FORMAT)
+	{
+		// The original image doesn't have a palette, and the format isn't
+		// the one expected by CLDIB. Convert it.
+
 		uint32_t *colors = (uint32_t*) malloc(sizeof(uint32_t) * fi->width * fi->height);
 		if (colors == NULL)
 			return NULL;
+
 		plum_convert_colors(colors, fi->data, fi->width * fi->height, CLDIB_PLUM_COLOR_FORMAT, fi->color_format);
 		dib = dib_alloc(fi->width, fi->height, 32, (const BYTE*) colors);
+
 		free(colors);
-	} else {
+	}
+	else
+	{
+		// If the format of the image matches the one expected by CLDIB there is
+		// nothing to do.
+
 		dib = dib_alloc(fi->width, fi->height, 32, (const BYTE*) fi->data);
 	}
 
