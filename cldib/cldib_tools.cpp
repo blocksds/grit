@@ -12,8 +12,11 @@
   * Changed all BOOL/TRUE/FALSE into bool/true/false.
 */
 
+#include <assert.h>
+
 #include "cldib_core.h"
 #include "cldib_tools.h"
+#include "logger.h"
 
 // === GLOBALS ========================================================
 
@@ -262,6 +265,8 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 	if(dib == NULL || dib_get_bpp(dib) != 8)
 		return 0;
 
+	lprintf(LOG_STATUS, "Reducing palette\n");
+
 	int ii, jj, kk, ix, iy;
 
 	int dibW, dibH, dibP;
@@ -270,12 +275,13 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 	BYTE *dibD= dib_get_img(dib);
 
 	// Get palette histogram
-	int histo[256];
+	int histo[256] = { 0 };
 
-	memset(histo, 0, sizeof(histo));
 	for(iy=0; iy<dibH; iy++)
+	{
 		for(ix=0; ix<dibW; ix++)
 			histo[dibD[iy*dibP+ix]]++;
+	}
 
 	// Allocate room for new palette and init with ext pal
 	// NOTE: extPal is assumed reduced!
@@ -285,18 +291,23 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 
 	int count;
 	RGBQUAD *rdxPal= (RGBQUAD*)malloc(512*RGB_SIZE);
-	COLORREF *rdxClr= (COLORREF*)rdxPal, *dibClr= (COLORREF*)dib_get_pal(dib);
+	assert(rdxPal != NULL);
+
+	COLORREF *rdxClr= (COLORREF*)rdxPal;
+	COLORREF *dibClr= (COLORREF*)dib_get_pal(dib);
 
 	memset(rdxPal, 0, 512*RGB_SIZE);
 	if(extPal != NULL && extPal->data != NULL)
 	{
 		memcpy(rdxPal, extPal->data, rec_size(extPal));
 		count= extPal->height;
+		lprintf(LOG_STATUS, "  With starting palete: %d colors\n", count);
 	}
 	else
 	{
 		rdxClr[0]= dibClr[0];
 		count= 1;
+		lprintf(LOG_STATUS, "  Without starting palete\n");
 	}
 
 	// PONDER: always keep index 0 ?
@@ -319,6 +330,8 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 			// Match: add color to table
 			if(jj == count)
 			{
+				// TODO: If the user has provided a palette and we're adding
+				// more colors, should we just fail instead of adding more?
 				rdxClr[jj]= dibClr[ii];
 				count++;
 			}
@@ -328,6 +341,8 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 			kk++;
 		}
 	}
+
+	lprintf(LOG_STATUS, "  Total merged colors: %d\n", count);
 
 	// PONDER: what *should* happen if nn > PAL_MAX ?
 	// Fail, trunc or re-quantize?
