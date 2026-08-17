@@ -93,6 +93,7 @@ CLDIB *plum2dib(struct plum_image *fi)
 		dib = dib_alloc(fi->width, fi->height, 8, (const BYTE*) fi->data);
 		if (dib == NULL)
 			return NULL;
+		memset(dib_get_pal(dib), 0, sizeof(RGBQUAD) * 256);
 		plum_convert_colors(dib_get_pal(dib), fi->palette, nclrs, CLDIB_PLUM_COLOR_FORMAT, fi->color_format);
 	} else if (fi->color_format != CLDIB_PLUM_COLOR_FORMAT) {
 		uint32_t *colors = (uint32_t*) malloc(sizeof(uint32_t) * fi->width * fi->height);
