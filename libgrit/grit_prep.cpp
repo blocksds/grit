@@ -360,7 +360,7 @@ bool grit_prep_work_dib(GritRec *gr)
 		if(gr->palIsShared)
 		{
 			lprintf(LOG_STATUS, "  Palette merging\n");
-			nn= dib_pal_reduce(dib, &gr->shared->palRec);
+			nn= dib_pal_reduce(dib, &gr->shared->palRec, gr->palAllowNew);
 			lprintf(LOG_STATUS, "    New palette has %d colors\n", nn);
 			if(nn>PAL_MAX) {
 				lprintf(LOG_ERROR, "    New palette exceeds max size (%d > %d).\n",

@@ -323,6 +323,7 @@ struct GritRec
 	int		 palEnd;		//!< Final palette entry to export (exclusive)
 	bool	 palEndSet;		//!< Whether the user set the palette end
 	bool	 palIsShared;	//!< Shared palette (-pS),
+	bool	 palAllowNew;	//!< Allow new colors to be added to the palette
 
 // Shared information
 	GritShared	*shared;

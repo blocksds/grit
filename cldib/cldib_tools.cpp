@@ -259,7 +259,7 @@ bool data_redim(const RECORD *src, RECORD *dst, int tileH, int tileN)
 	\note	The order of colors is the order of appearance, except for the 
 		first one.
 */
-int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
+int dib_pal_reduce(CLDIB *dib, RECORD *extPal, bool allowNewColors)
 {
 	// Only for 8bpp (for now)
 	if(dib == NULL || dib_get_bpp(dib) != 8)
@@ -344,8 +344,16 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 		// There isn't any match, add color to table
 		if(jj == count)
 		{
-			// TODO: If the user has provided a reference palette and we're
-			// adding more colors, should we just fail instead of adding more?
+			if (!allowNewColors)
+			{
+				// This can happen if the user has provided a reference palette
+				// we can't add more colors to it.
+				lprintf(LOG_ERROR, "Color %d not found in palette: %06X\n",
+						ii, dibClr[ii]);
+				exit(EXIT_FAILURE);
+			}
+
+			// If there is no reference palette, we can add them.
 			rdxClr[jj]= dibClr[ii];
 			count++;
 		}

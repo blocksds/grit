@@ -298,6 +298,7 @@ bool grit_parse_pal(GritRec *gr, const strvec &args)
 	}
 
 	// Shared palette
+	gr->palAllowNew= true;
 	if(CLI_BOOL("-pS"))
 		gr->palIsShared= true;
 
@@ -536,6 +537,7 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		// Save the path to be used later to load the file or generate a new one
 		strrepl(&gr->shared->palettePath, str);
 		gr->palIsShared= true;
+		gr->palAllowNew= false;
 
 		lprintf(LOG_STATUS, "Ext. palette path: %s.\n", gr->shared->palettePath);
 	}
@@ -803,7 +805,8 @@ bool grit_load_ext_pal(GritRec *gr)
 		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
 		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
 
-		int nn = dib_pal_reduce(dib, &gr->shared->palRec);
+		// Always allow adding the colors of the reference palette
+		int nn = dib_pal_reduce(dib, &gr->shared->palRec, true);
 
 		lprintf(LOG_STATUS, "  External palette colors: %d\n", nn);
 
@@ -923,7 +926,8 @@ bool grit_load_ext_tiles(GritRec *gr)
 		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
 		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
 
-		int nn= dib_pal_reduce(dib, &gr->shared->palRec);
+		// Always allow adding the colors of the reference palette
+		int nn= dib_pal_reduce(dib, &gr->shared->palRec, true);
 
 		lprintf(LOG_STATUS, "  External tileset colors: %d / %d\n", nn,
 				dib_get_nclrs(dib));

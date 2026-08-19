@@ -60,7 +60,7 @@ bool data_redim(const RECORD *src, RECORD *dst, int tileH, int tileN);
 
 //! \name Redox functions
 //\{
-int dib_pal_reduce(CLDIB *dib, RECORD *extPal);
+int dib_pal_reduce(CLDIB *dib, RECORD *extPal, bool allowNewColors);
 // dib_tile_reduce(...)
 // dib_tile_oxidize(...)
 //\}
