@@ -318,28 +318,43 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal)
 	kk=0;
 	for(ii=0; ii<PAL_MAX; ii++)
 	{
-		if(histo[ii])
+		// Don't try to add colors from the palette of the new image unless they
+		// are actually used in the image.
+		if(histo[ii] == 0)
+			continue;
+
+		// Check if the palette already has the color
+		for(jj=0; jj<count; jj++)
 		{
-			for(jj=0; jj<count; jj++)
+			// Ignore alpha channel. Also, ignore the bottom 3 bits of each
+			// channel (the GBA and NDS only support 5 bits per channel).
+			if((rdxClr[jj] & 0xF8F8F8) == (dibClr[ii] & 0xF8F8F8))
 			{
-				// Ignore alpha channel
-				if((rdxClr[jj] & 0xFFFFFF) == (dibClr[ii] & 0xFFFFFF))
-					break;
-			}
+				// However, warn the user if a color isn't an exact match
+				if((rdxClr[jj] & 0x070707) != (dibClr[ii] & 0x070707))
+				{
+					lprintf(LOG_WARNING, "Partial color match: %06X ~ %06X\n",
+							rdxClr[jj], dibClr[ii]);
+				}
 
-			// Match: add color to table
-			if(jj == count)
-			{
-				// TODO: If the user has provided a palette and we're adding
-				// more colors, should we just fail instead of adding more?
-				rdxClr[jj]= dibClr[ii];
-				count++;
+				break;
 			}
-
-			srcIdx[kk]= jj;
-			dstIdx[kk]= ii;
-			kk++;
 		}
+
+		// There isn't any match, add color to table
+		if(jj == count)
+		{
+			// TODO: If the user has provided a reference palette and we're
+			// adding more colors, should we just fail instead of adding more?
+			rdxClr[jj]= dibClr[ii];
+			count++;
+		}
+
+		// Keep track of the old and new indices so that we can remap all colors
+		// in the new image to use the combined palette.
+		srcIdx[kk]= jj;
+		dstIdx[kk]= ii;
+		kk++;
 	}
 
 	lprintf(LOG_STATUS, "  Total merged colors: %d\n", count);
