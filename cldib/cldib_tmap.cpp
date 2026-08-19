@@ -204,10 +204,13 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 	u32 rdxN;
 	CLDIB *rdx;
 
+	lprintf(LOG_STATUS, "  Generating tilemap from image\n");
+
 	if(extTiles != NULL)
 	{
 		if(dibB != dib_get_bpp(extTiles)) {
-			lprintf(LOG_ERROR, "Mismatched BPP (%d != %d)\n", dibB, dib_get_bpp(extTiles));
+			lprintf(LOG_ERROR, "Mismatched BPP between image and external tileset (%d != %d)\n",
+					dibB, dib_get_bpp(extTiles));
 			exit(EXIT_FAILURE);
 		}
 
@@ -215,6 +218,8 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 		// "extTiles" and the new tiles of "dib".
 		rdxN= dib_get_height(extTiles)/tileH;
 		rdx = dib_copy(extTiles, 0, 0, tileW, (mapN+rdxN)*tileH, false);
+
+		lprintf(LOG_STATUS, "    Using external tileset: %d tiles\n", rdxN);
 	}
 	else
 	{
@@ -223,6 +228,8 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 		rdx = dib_alloc(tileW, (mapN+rdxN)*tileH, dibB, NULL);
 		memset(dib_get_img(rdx), 0, dib_get_pitch(rdx)*tileH);
 		dib_pal_cpy(rdx, dib);
+
+		lprintf(LOG_STATUS, "    Not using external tileset\n");
 	}
 
 	if(rdx == NULL)
@@ -256,6 +263,8 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 						dib_get_size_img(tmpDib));
 					rdxN++;
+					//lprintf(LOG_STATUS, "    New tile @ (%d, %d): %d\n",
+					//		tx, ty, me.index());
 				}
 
 				mapD[tx*mapH+ty]= me;
@@ -282,6 +291,8 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 						dib_get_size_img(tmpDib));
 					rdxN++;
+					//lprintf(LOG_STATUS, "    New tile @ (%d, %d): %d\n",
+					//		tx, ty, me.index());
 				}
 
 				mapD[ty*mapW+tx]= me;
@@ -291,6 +302,8 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 
 	// Free temporary tile
 	dib_free(tmpDib);
+
+	lprintf(LOG_STATUS, "    New total number of tiles: %d\n", rdxN);
 
 	// Shrink tileset to its actual size (dib_find() has already optimized it)
 	tmpDib= dib_copy(rdx, 0, 0, tileW, rdxN*tileH, false);
