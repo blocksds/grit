@@ -296,7 +296,8 @@ struct GritRec
 	RGBQUAD	 gfxAlphaColor;	//!< Transparent color (-gT {num} ). 
 	u32		 gfxOffset;		//!< Pixel value offset (-ga {num}).
 	bool	 gfxIsShared;	//!< Graphics are shared (-gS).
-		
+	bool	 gfxAllowNew;	//!< Allow new graphics (tiles) to be added
+
 // Map:
 	echar	 mapProcMode;	//!< Map process mode (-m).
 	echar	 mapDataType;	//!< Map data type (-mu {num} ).

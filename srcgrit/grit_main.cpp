@@ -373,6 +373,7 @@ bool grit_parse_gfx(GritRec *gr, const strvec &args)
 	}
 
 	// Shared graphics (internal only)
+	gr->gfxAllowNew= true;
 	if(CLI_BOOL("-gS"))
 		gr->gfxIsShared= true;
 
@@ -553,6 +554,7 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		// Save the path to be used later to load the file or generate a new one
 		strrepl(&gr->shared->tilePath, str);
 		gr->gfxIsShared= true;
+		gr->gfxAllowNew= false;
 
 		lprintf(LOG_STATUS, "Ext. tile set path: %s.\n", gr->shared->tilePath);
 	}

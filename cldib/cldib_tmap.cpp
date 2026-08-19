@@ -185,7 +185,7 @@ void tmap_init(Tilemap *tm, int mapW, int mapH, int tileW, int tileH, ETmapFlags
 *	  only the first column will be considered.
 */
 bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH, 
-	ETmapFlags flags, CLDIB *extTiles)
+	ETmapFlags flags, CLDIB *extTiles, bool allowNewTiles)
 {
 	// Safety checks
 	if(tm==NULL || dib==NULL || tileW<1 || tileH<1)
@@ -260,6 +260,12 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 				// Not found? Add to tileset
 				if(me.index() >= (int)rdxN)
 				{
+					if (!allowNewTiles)
+					{
+						lprintf(LOG_ERROR, "Unknown tile found at (%d, %d)\n", tx, ty);
+						exit(EXIT_FAILURE);
+					}
+
 					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 						dib_get_size_img(tmpDib));
 					rdxN++;
@@ -288,6 +294,12 @@ bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileW, int tileH,
 				// Not found? Add to tileset
 				if(me.index() >= (int)rdxN)
 				{
+					if (!allowNewTiles)
+					{
+						lprintf(LOG_ERROR, "Unknown tile found at (%d, %d)\n", tx, ty);
+						exit(EXIT_FAILURE);
+					}
+
 					memcpy(dib_get_img_at(rdx, 0, tileH*rdxN), tmpD,
 						dib_get_size_img(tmpDib));
 					rdxN++;

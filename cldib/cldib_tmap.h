@@ -125,7 +125,7 @@ CLDIB *tmap_detach_tiles(Tilemap *tm);
 void tmap_init(Tilemap *tm, int mapWidth, int mapHeight, int tileW, int tileH, 
 	ETmapFlags flags);
 bool tmap_init_from_dib(Tilemap *tm, CLDIB *dib, int tileWidth, int tileHeight, 
-	ETmapFlags flags, CLDIB *extTiles);
+	ETmapFlags flags, CLDIB *extTiles, bool allowNewTiles);
 
 CLDIB *tmap_render(Tilemap *tm, const RECT *rect);
 

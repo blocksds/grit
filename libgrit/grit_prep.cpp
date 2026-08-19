@@ -509,10 +509,12 @@ bool grit_prep_map(GritRec *gr)
 		if(extW == mtileW)
 		{
 			lprintf(LOG_STATUS, "  Using external metatileset.\n");
-			tmap_init_from_dib(metaMap, workDib, mtileW, mtileH, flags, extDib);
+			tmap_init_from_dib(metaMap, workDib, mtileW, mtileH, flags, extDib, gr->gfxAllowNew);
 		}
 		else
-			tmap_init_from_dib(metaMap, workDib, mtileW, mtileH, flags, NULL);
+		{
+			tmap_init_from_dib(metaMap, workDib, mtileW, mtileH, flags, NULL, true);
+		}
 
 		mf= c_mapselGbaText;
 		tileN= tmap_get_tilecount(metaMap);
@@ -556,10 +558,12 @@ bool grit_prep_map(GritRec *gr)
 	if(extW == tileW)
 	{
 		lprintf(LOG_STATUS, "  Using external tileset.\n");
-		tmap_init_from_dib(map, workDib, tileW, tileH, flags, extDib);
+		tmap_init_from_dib(map, workDib, tileW, tileH, flags, extDib, gr->gfxAllowNew);
 	}
 	else
-		tmap_init_from_dib(map, workDib, tileW, tileH, flags, NULL);
+	{
+		tmap_init_from_dib(map, workDib, tileW, tileH, flags, NULL, true);
+	}
 
 	// --- Pack/Reformat and compress ---
 	//# TODO: allow custom mapsel format.
