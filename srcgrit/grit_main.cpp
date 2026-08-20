@@ -773,6 +773,14 @@ bool grit_load_ext_pal(GritRec *gr)
 		return false;
 	}
 
+	// If an external palette is used, -gT can't be used
+	if (gr->gfxHasAlpha)
+	{
+		lprintf(LOG_ERROR, "'-gT' is incompatible with '-fw'.\n");
+		lprintf(LOG_ERROR, "Move the transparent color to index 0 of the palette instead.\n");
+		exit(EXIT_FAILURE);
+	}
+
 	CLDIB *dib= NULL;
 	dib= dib_load(grs->palettePath, NULL);
 
@@ -796,7 +804,7 @@ bool grit_load_ext_pal(GritRec *gr)
 	// Convert from 32/24 bpp to 8 bpp
 	if( dib_get_bpp(dib) > 8 )
 	{
-		bool allocTransparent = true;
+		bool allocTransparent = false;
 		dib_convert(dib, gr->gfxBpp, 0, allocTransparent);
 	}
 
