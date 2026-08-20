@@ -938,17 +938,98 @@ bool grit_load_ext_tiles(GritRec *gr)
 	}
 	else
 	{
-		grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
-		memcpy(grs->palRec.data, dib_get_pal(dib), 512);
-
 		// Always allow adding the colors of the reference palette
-		int nn= dib_pal_reduce(dib, &gr->shared->palRec, true);
+		int nn = dib_pal_reduce(dib, NULL, true);
 
 		lprintf(LOG_STATUS, "  External tileset colors: %d / %d\n", nn,
 				dib_get_nclrs(dib));
 
 		grs->palRec.width = 4;
 		grs->palRec.height = nn;
+
+		if (gr->gfxHasAlpha || gr->palHasAlpha)
+		{
+			// Look for the transparent color in the palette and swap index 0
+			// with the current index of the transparent color.
+
+			int transpIndex = -1;
+
+			RGBQUAD *pal = dib_get_pal(dib);
+
+			if (gr->palHasAlpha)
+			{
+				transpIndex = gr->palAlphaId;
+			}
+			else // if (gr->gfxHasAlpha)
+			{
+				u32 refRed = gr->gfxAlphaColor.rgbRed;
+				u32 refGreen = gr->gfxAlphaColor.rgbGreen;
+				u32 refBlue = gr->gfxAlphaColor.rgbBlue;
+
+				lprintf(LOG_STATUS, "  Looking for transparent color (%02X, %02X, %02X)\n",
+						refRed, refGreen, refBlue);
+
+				for (int i = 0; i < nn; i++)
+				{
+					u32 r = pal[i].rgbRed;
+					u32 g = pal[i].rgbGreen;
+					u32 b = pal[i].rgbBlue;
+
+					if ((refRed == r) && (refGreen == g) && (refBlue == b))
+					{
+						transpIndex = i;
+						break;
+					}
+				}
+			}
+
+			if (transpIndex == -1)
+			{
+				lprintf(LOG_WARNING, "Transparent color not found in tileset. It will be added.\n");
+
+				if (nn == 256)
+				{
+					lprintf(LOG_ERROR, "The palette is full, the transparent color can't be added\n");
+					exit(EXIT_FAILURE);
+				}
+
+				// Add it to the palette at nn and set that as transpIndex
+				pal[nn].rgbRed = gr->gfxAlphaColor.rgbRed;
+				pal[nn].rgbGreen = gr->gfxAlphaColor.rgbGreen;
+				pal[nn].rgbBlue = gr->gfxAlphaColor.rgbBlue;
+				transpIndex = nn;
+
+				nn++;
+				grs->palRec.height = nn;
+
+				lprintf(LOG_STATUS, "  Transparent color added.\n");
+			}
+
+			lprintf(LOG_STATUS, "  Transparent color is at index %d\n", transpIndex);
+
+			lprintf(LOG_STATUS, "  Swapping it with index 0...\n");
+
+			// Swap colors in dib
+
+			BYTE *imgD = dib_get_img(dib);
+			int ss = dib_get_size_img(dib);
+
+			for (int ii=0; ii < ss; ii++)
+			{
+				if (imgD[ii] == 0)
+					imgD[ii] = transpIndex;
+				else if (imgD[ii] == transpIndex)
+					imgD[ii] = 0;
+			}
+
+			RGBQUAD tmp;
+			SWAP3(pal[0], pal[transpIndex], tmp);
+
+			// Save the new palette as shared palette
+
+			grs->palRec.data = (BYTE*)malloc(512 * sizeof(char));
+			memcpy(grs->palRec.data, dib_get_pal(dib), 512);
+		}
 	}
 
 	lprintf(LOG_STATUS, "  External tileset `%s' loaded\n", grs->tilePath);
