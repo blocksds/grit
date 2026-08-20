@@ -280,7 +280,10 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal, bool allowNewColors)
 	for(iy=0; iy<dibH; iy++)
 	{
 		for(ix=0; ix<dibW; ix++)
-			histo[dibD[iy*dibP+ix]]++;
+		{
+			int index = dibD[iy*dibP+ix];
+			histo[index]++;
+		}
 	}
 
 	// Allocate room for new palette and init with ext pal
