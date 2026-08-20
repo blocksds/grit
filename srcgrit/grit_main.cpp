@@ -770,9 +770,9 @@ bool grit_load_ext_pal(GritRec *gr)
 	}
 
 	// If an external palette is used, -gT can't be used
-	if (gr->gfxHasAlpha)
+	if (gr->gfxHasAlpha || gr->palHasAlpha)
 	{
-		lprintf(LOG_ERROR, "'-gT' is incompatible with '-fw'.\n");
+		lprintf(LOG_ERROR, "'-gT' and '-pT' are incompatible with '-fw'.\n");
 		lprintf(LOG_ERROR, "Move the transparent color to index 0 of the palette instead.\n");
 		exit(EXIT_FAILURE);
 	}
