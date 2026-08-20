@@ -804,6 +804,15 @@ bool grit_load_ext_pal(GritRec *gr)
 		dib_convert(dib, gr->gfxBpp, 0, allocTransparent);
 	}
 
+	// The width and pitch should match after converting it to 8 bpp
+	// TODO: Remove this workaround when libplum loads data into CLDIB structs
+	// with the correct pitch.
+	if(dib_get_pitch(dib) != dib_get_width(dib))
+	{
+		lprintf(LOG_ERROR, "Invalid width of external palette file: %d\n", dib_get_width(dib));
+		exit(EXIT_FAILURE);
+	}
+
 	// Now load the palette of the tileset
 	{
 		assert(grs->palRec.data == NULL);

@@ -16,6 +16,10 @@
 #include "logger.h"
 #include "plum.h"
 
+// TODO: The functions in this file don't consider the fact that the width of
+// the image doesn't match the pitch of a line in a CLDIB image. This needs to
+// be fixed.
+
 // ! Initialize libplum and related materials
 void plumInit()
 {
