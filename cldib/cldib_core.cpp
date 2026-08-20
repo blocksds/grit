@@ -118,7 +118,12 @@ CLDIB *dib_alloc(int width, int height, int bpp, const BYTE *data,
 	if(data != NULL)
 	{
 		if(bTopDown)
-			memcpy(dib_get_img(dib), data, dibS);
+		{
+			const BYTE *srcL= &data[0];
+			BYTE *dstL= dib_get_img(dib);
+			for(ii=0; ii<height; ii++)
+				memcpy(&dstL[ii*dibP], &srcL[ii*dibP], dibP);
+		}
 		else
 		{
 			const BYTE *srcL= &data[(height-1)*dibP];
