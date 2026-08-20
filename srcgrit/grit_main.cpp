@@ -539,8 +539,6 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		strrepl(&gr->shared->palettePath, str);
 		gr->palIsShared= true;
 		gr->palAllowNew= false;
-
-		lprintf(LOG_STATUS, "Ext. palette path: %s.\n", gr->shared->palettePath);
 	}
 
 	// --- External file (ext tileset) ---
@@ -555,8 +553,6 @@ bool grit_parse_file(GritRec *gr, const strvec &args)
 		strrepl(&gr->shared->tilePath, str);
 		gr->gfxIsShared= true;
 		gr->gfxAllowNew= false;
-
-		lprintf(LOG_STATUS, "Ext. tile set path: %s.\n", gr->shared->tilePath);
 	}
 
 	return true;
@@ -757,7 +753,7 @@ bool grit_prep_shared_output(GritRec*gr, const strvec &args)
 
 bool grit_load_ext_pal(GritRec *gr)
 {
-	lprintf(LOG_STATUS, "Loading external palette file.\n");
+	lprintf(LOG_STATUS, "Loading external palette file: %s\n", gr->shared->palettePath);
 
 	if(dib_load == NULL)
 	{
@@ -793,7 +789,7 @@ bool grit_load_ext_pal(GritRec *gr)
 	// Check that grit is trying to convert to 8 bpp
 	if(gr->gfxBpp != 8)
 	{
-		lprintf(LOG_ERROR, "  Invalid target bpp for external palette file: %d bpp\n",
+		lprintf(LOG_ERROR, "Invalid target bpp for external palette file: %d bpp\n",
 				gr->gfxBpp);
 		return false;
 	}
@@ -839,7 +835,7 @@ bool grit_load_ext_pal(GritRec *gr)
 */
 bool grit_load_ext_tiles(GritRec *gr)
 {
-	lprintf(LOG_STATUS, "Loading external tileset file.\n");
+	lprintf(LOG_STATUS, "Loading external tileset file: %s\n", gr->shared->tilePath);
 
 	if(dib_load == NULL)
 	{

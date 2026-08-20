@@ -301,13 +301,13 @@ int dib_pal_reduce(CLDIB *dib, RECORD *extPal, bool allowNewColors)
 	{
 		memcpy(rdxPal, extPal->data, rec_size(extPal));
 		count= extPal->height;
-		lprintf(LOG_STATUS, "  With starting palete: %d colors\n", count);
+		lprintf(LOG_STATUS, "  With pre-existing palete: %d colors\n", count);
 	}
 	else
 	{
 		rdxClr[0]= dibClr[0];
 		count= 1;
-		lprintf(LOG_STATUS, "  Without starting palete\n");
+		lprintf(LOG_STATUS, "  Without pre-existing palete\n");
 	}
 
 	// PONDER: always keep index 0 ?
